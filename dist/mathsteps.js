@@ -3074,10 +3074,55 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
   const termValues = Object.values(terms).toString();
   const sortedTermValues = Object.values(terms).sort(sortTerms).toString();
   //console.log('Keys=', termKeys, 'Values=', termValues);
+  console.log('termValues=', termValues, 'sortedTermValues=', sortedTermValues);
   for (let i = 0; i < termTypes.length; ++i) {
     //console.log('TermType=', termTypes[i]);
     switch (termTypes[i]) {
       case 'other':
+        //debugger;
+        if (node.args.length == 2) {
+          // layout 1
+          if (node.args[0].type == 'OperatorNode' &&
+            node.args[1].type == 'OperatorNode' &&
+            node.args[0].args.length == 2 &&
+            node.args[1].args.length == 2 &&
+            node.args[0].args[0].type == 'OperatorNode' &&
+            node.args[1].args[0].type == 'OperatorNode' &&
+            node.args[0].args[0].args.length == 2 &&
+            node.args[1].args[0].args.length == 2 &&
+            node.args[0].args[0].args[0].type == 'ConstantNode' &&
+            node.args[1].args[0].args[0].type == 'ConstantNode') {
+            console.log('Constants can be combined');
+            //debugger;
+            return true;
+          }
+          // layout 2
+          if (node.args[0].type == 'OperatorNode' &&
+            node.args[1].type == 'OperatorNode' &&
+            node.args[0].args.length == 2 &&
+            node.args[1].args.length == 3 &&
+            node.args[0].args[0].type == 'OperatorNode' &&
+            node.args[0].args[0].args.length == 2 &&
+            node.args[0].args[0].args[0].type == 'ConstantNode' &&
+            node.args[1].args[0].type == 'ConstantNode') {
+            console.log('Constants can be combined');
+            //debugger;
+            return true;
+          }
+          // layout 3
+          if (node.args[0].type == 'OperatorNode' &&
+            node.args[1].type == 'OperatorNode' &&
+            node.args[0].args.length == 3 &&
+            node.args[1].args.length == 2 &&
+            node.args[1].args[0].type == 'OperatorNode' &&
+            node.args[1].args[0].args.length == 2 &&
+            node.args[0].args[0].type == 'ConstantNode' &&
+            node.args[1].args[0].args[0].type == 'ConstantNode') {
+            console.log('Constants can be combined');
+            //debugger;
+            return true;
+          }
+        }
         return false;
     }
   }
@@ -3094,6 +3139,65 @@ LikeTermCollector.collectLikeTerms = function(node) {
   if (!LikeTermCollector.canCollectLikeTerms(node)) {
     return Node.Status.noChange(node);
   }
+
+  //altered - START
+  // layout 1
+  if (node.args.length == 2) {
+    if (node.args[0].type == 'OperatorNode' &&
+      node.args[1].type == 'OperatorNode' &&
+      node.args[0].args.length == 2 &&
+      node.args[1].args.length == 2 &&
+      node.args[0].args[0].type == 'OperatorNode' &&
+      node.args[1].args[0].type == 'OperatorNode' &&
+      node.args[0].args[0].args.length == 2 &&
+      node.args[1].args[0].args.length == 2 &&
+      node.args[0].args[0].args[0].type == 'ConstantNode' &&
+      node.args[1].args[0].args[0].type == 'ConstantNode') {
+      const newNode = node.cloneDeep();
+      //debugger
+      newNode.args[0].args[0].args[0].value = (Number(node.args[0].args[0].args[0].value) + Number(node.args[1].args[0].args[0].value)).toString();
+      newNode.args = newNode.args.slice(0, 1);
+      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[0].toString(), 'args', newNode.args);
+      return Node.Status.nodeChanged(
+        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+    }
+    // layout 2
+    if (node.args[0].type == 'OperatorNode' &&
+      node.args[1].type == 'OperatorNode' &&
+      node.args[0].args.length == 2 &&
+      node.args[1].args.length == 3 &&
+      node.args[0].args[0].type == 'OperatorNode' &&
+      node.args[0].args[0].args.length == 2 &&
+      node.args[0].args[0].args[0].type == 'ConstantNode' &&
+      node.args[1].args[0].type == 'ConstantNode') {
+      const newNode = node.cloneDeep();
+      //debugger;
+      newNode.args[0].args[0].args[0].value = (Number(node.args[0].args[0].args[0].value) + Number(node.args[1].args[0].value)).toString();
+      newNode.args = newNode.args.slice(0, 1);
+      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[0].toString(), 'args', newNode.args);
+      return Node.Status.nodeChanged(
+        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+    }
+    // layout 3
+    if (node.args[0].type == 'OperatorNode' &&
+      node.args[1].type == 'OperatorNode' &&
+      node.args[0].args.length == 3 &&
+      node.args[1].args.length == 2 &&
+      node.args[1].args[0].type == 'OperatorNode' &&
+      node.args[1].args[0].args.length == 2 &&
+      node.args[0].args[0].type == 'ConstantNode' &&
+      node.args[1].args[0].args[0].type == 'ConstantNode') {
+      console.log('Constants can be combined');
+      const newNode = node.cloneDeep();
+      //debugger;
+      newNode.args[0].args[0].value = (Number(node.args[0].args[0].value) + Number(node.args[1].args[0].args[0].value)).toString();
+      newNode.args = newNode.args.slice(0, 1);
+      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[0].toString(), 'args', newNode.args);
+      return Node.Status.nodeChanged(
+        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+    }
+  }
+  //altered - END
 
   const op = node.op;
   let terms = [];
@@ -3268,6 +3372,7 @@ function getTermsForCollectingMultiplication(node) {
       throw Error('Unsupported node type: ' + child.type);
     }
   }
+  console.log('getTermsForCollectingMultiplication', Object.values(terms).toString())
   return terms;
   //const sortedTermValues = Object.values(terms).sort(sortTerms);
   //return sortedTermValues;
@@ -3739,6 +3844,9 @@ function collectAndCombineOperation(node) {
   let substeps = [];
 
   const status = LikeTermCollector.collectLikeTerms(node.cloneDeep());
+  if (!status.hasChanged) {
+    debugger;
+  }
   if (!status.hasChanged()) {
     return status;
   }
