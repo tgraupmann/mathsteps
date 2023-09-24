@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <title>Algebra Examples for Mathsteps</title>
+    <script src="dist/mathsteps.js"></script>
+</head>
+
+<body>
+    <div id="example1"></div>
+</body>
+
+<script>
+
+    function doExample1() {
+
+        const example1 = document.getElementById('example1');
+
+        const formula = `3(a + h)^2 + 2(a + h) - 1`;
+
+        let content = `<table border="1">`;
+
+        content += `<tr align="center"><td colspan="4">`
+        content += formula;
+        content += `</td></tr>`;
+
+        content += `<tr>
+                            <td>Before Change</td>
+                            <td>Change</td>
+                            <td>After Change</td>
+                            <td># of Substeps</td>
+                        </tr>`;
+
+        const steps = mathsteps.simplifyExpression(formula);
+
+        steps.forEach(step => {
+            content += `<tr>`;
+            content += `<td>` + step.oldNode.toString() + `</td>`;
+            content += `<td>` + step.changeType + `</td>`;
+            content += `<td>` + step.newNode.toString() + `</td>`;
+            content += `<td>` + step.substeps.length + `</td>`;
+        });
+
+        content += `</table>`;
+
+        example1.innerHTML = content;
+    }
+
+    doExample1();
+
+</script>
+
+</html>
