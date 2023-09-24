@@ -8,6 +8,28 @@ https://www.youtube.com/watch?v=iCrargw1rrM
 
 Mathsteps requires Node version > 6.0.0
 
+## Dependencies
+
+* Install dependencies
+
+```sh
+npm install
+```
+
+* Expose mathsteps.js for the browser with [Browserify](https://browserify.org/)
+
+```sh
+# Install globally
+npm install -g browserify
+```
+
+Export mathsteps for the browser.
+
+```sh
+mkdir dist
+browserify index.js -o dist/mathsteps.js
+```
+
 ## Usage
 
 To install mathsteps using npm:
