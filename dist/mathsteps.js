@@ -3062,8 +3062,31 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
   // which will be recorded as a step, but doesn't change the order of terms)
   const termTypes = Object.keys(terms);
   const filteredTermTypes = termTypes.filter(x => x !== OTHER);
-  return (termTypes.length > 1 &&
-    filteredTermTypes.some(x => terms[x].length > 1));
+  // changed
+  //return (termTypes.length > 1 &&
+  //  filteredTermTypes.some(x => terms[x].length > 1));
+  // altered
+  let result = (termTypes.length > 1 && filteredTermTypes.some(x => terms[x].length > 1));
+  if (result) {
+    return true;
+  }
+  const termKeys = termTypes.toString();
+  const termValues = Object.values(terms).toString();
+  const sortedTermValues = Object.values(terms).sort(sortTerms).toString();
+  //console.log('Keys=', termKeys, 'Values=', termValues);
+  for (let i = 0; i < termTypes.length; ++i) {
+    //console.log('TermType=', termTypes[i]);
+    switch (termTypes[i]) {
+      case 'other':
+        return false;
+    }
+  }
+  //console.log('sortedTermValues', sortedTermValues);
+  if (termValues !== sortedTermValues) {
+    //console.log('Keys=', termKeys, 'Values=', termValues);
+    return true; //converts 3 * h * a to 3 * a * h
+  }
+  return false;
 };
 
 // Collects like terms for an operation node and returns a Node.Status object.
@@ -3246,6 +3269,8 @@ function getTermsForCollectingMultiplication(node) {
     }
   }
   return terms;
+  //const sortedTermValues = Object.values(terms).sort(sortTerms);
+  //return sortedTermValues;
 }
 
 // A helper function for getTermsForCollectingMultiplication
