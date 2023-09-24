@@ -27,7 +27,7 @@ Export mathsteps for the browser.
 
 ```sh
 mkdir dist
-browserify index.js -o dist/mathsteps.js
+browserify index-browserify.js -o dist/mathsteps.js
 ```
 
 ## Usage
