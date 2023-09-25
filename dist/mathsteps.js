@@ -3033,6 +3033,127 @@ const OTHER = 'other';
 
 const LikeTermCollector = {};
 
+// altered - START
+LikeTermCollector.hasLikeCoefficients = function (term) {
+  
+  if (term && term.length == 2) {
+
+    // layout 1
+    if (term[0].type == 'OperatorNode' &&
+      term[1].type == 'OperatorNode' &&
+      term[0].args.length == 2 &&
+      term[1].args.length == 2 &&
+      term[0].args[0].type == 'OperatorNode' &&
+      term[1].args[0].type == 'OperatorNode' &&
+      term[0].args[0].args.length == 2 &&
+      term[1].args[0].args.length == 2 &&
+      term[0].args[0].args[0].type == 'ConstantNode' &&
+      term[1].args[0].args[0].type == 'ConstantNode') {
+      console.log('hasLikeCoefficients: layout1', 'Constants can be combined');
+      //debugger;
+      return true;
+    }
+    // layout 2
+    if (term[0].type == 'OperatorNode' &&
+      term[1].type == 'OperatorNode' &&
+      term[0].args.length == 2 &&
+      term[1].args.length == 3 &&
+      term[0].args[0].type == 'OperatorNode' &&
+      term[0].args[0].args.length == 2 &&
+      term[0].args[0].args[0].type == 'ConstantNode' &&
+      term[1].args[0].type == 'ConstantNode') {
+      console.log('hasLikeCoefficients: layout2', 'Constants can be combined');
+      //debugger;
+      return true;
+    }
+    // layout 3
+    if (term[0].type == 'OperatorNode' &&
+      term[1].type == 'OperatorNode' &&
+      term[0].args.length == 3 &&
+      term[1].args.length == 2 &&
+      term[1].args[0].type == 'OperatorNode' &&
+      term[1].args[0].args.length == 2 &&
+      term[0].args[0].type == 'ConstantNode' &&
+      term[1].args[0].args[0].type == 'ConstantNode') {
+      console.log('hasLikeCoefficients: layout3', 'Constants can be combined');
+      //debugger;
+      return true;
+    }
+  }
+
+  return false;
+}
+LikeTermCollector.combineLikeCoefficients = function (node) {
+
+  console.log('LikeTermCollector.combineLikeCoefficients', node.args);
+  for (let i = 0; i < node.args.length; i++) {
+    console.log('arg'+i, node.args[i].toString());
+    for (let j = i + 1; j < node.args.length; j++) {
+      //debugger;
+
+      // layout 1
+      if (node.args[i].type == 'OperatorNode' &&
+      node.args[j].type == 'OperatorNode' &&
+      node.args[i].args.length == 2 &&
+      node.args[j].args.length == 2 &&
+      node.args[i].args[0].type == 'OperatorNode' &&
+      node.args[j].args[0].type == 'OperatorNode' &&
+      node.args[i].args[0].args.length == 2 &&
+      node.args[j].args[0].args.length == 2 &&
+      node.args[i].args[0].args[0].type == 'ConstantNode' &&
+      node.args[j].args[0].args[0].type == 'ConstantNode') {
+      console.log('combineLikeCoefficients: layout1', 'Constants can be combined');
+      const newNode = node.cloneDeep();
+      //debugger
+      newNode.args[i].args[0].args[0].value = (Number(node.args[i].args[0].args[0].value) + Number(node.args[j].args[0].args[0].value)).toString();
+      newNode.args.splice(j, 1); // remove j
+      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
+      return Node.Status.nodeChanged(
+        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+    }
+    // layout 2
+    if (node.args[i].type == 'OperatorNode' &&
+      node.args[j].type == 'OperatorNode' &&
+      node.args[i].args.length == 2 &&
+      node.args[j].args.length == 3 &&
+      node.args[i].args[0].type == 'OperatorNode' &&
+      node.args[i].args[0].args.length == 2 &&
+      node.args[i].args[0].args[0].type == 'ConstantNode' &&
+      node.args[j].args[0].type == 'ConstantNode') {
+      console.log('combineLikeCoefficients: layout2', 'Constants can be combined');
+      const newNode = node.cloneDeep();
+      //debugger;
+      newNode.args[i].args[0].args[0].value = (Number(node.args[i].args[0].args[0].value) + Number(node.args[j].args[0].value)).toString();
+      newNode.args.splice(j, 1); // remove j
+      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
+      return Node.Status.nodeChanged(
+        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+    }
+    // layout 3
+    if (node.args[i].type == 'OperatorNode' &&
+      node.args[j].type == 'OperatorNode' &&
+      node.args[i].args.length == 3 &&
+      node.args[j].args.length == 2 &&
+      node.args[j].args[0].type == 'OperatorNode' &&
+      node.args[j].args[0].args.length == 2 &&
+      node.args[i].args[0].type == 'ConstantNode' &&
+      node.args[j].args[0].args[0].type == 'ConstantNode') {
+        console.log('combineLikeCoefficients: layout3', 'Constants can be combined');
+        const newNode = node.cloneDeep();
+        //debugger;
+        newNode.args[i].args[0].value = (Number(node.args[i].args[0].value) + Number(node.args[j].args[0].args[0].value)).toString();
+        newNode.args.splice(j, 1); // remove j
+        console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
+        return Node.Status.nodeChanged(
+          ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+      }
+    }
+  }
+
+  return node;
+}
+// altered - END
+
 // Given an expression tree, returns true if there are terms that can be
 // collected
 LikeTermCollector.canCollectLikeTerms = function(node) {
@@ -3079,49 +3200,14 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
     //console.log('TermType=', termTypes[i]);
     switch (termTypes[i]) {
       case 'other':
+        console.log('Node string', node.toString());
+        console.log('Node Formula', print.ascii(node));
         //debugger;
-        if (node.args.length == 2) {
-          // layout 1
-          if (node.args[0].type == 'OperatorNode' &&
-            node.args[1].type == 'OperatorNode' &&
-            node.args[0].args.length == 2 &&
-            node.args[1].args.length == 2 &&
-            node.args[0].args[0].type == 'OperatorNode' &&
-            node.args[1].args[0].type == 'OperatorNode' &&
-            node.args[0].args[0].args.length == 2 &&
-            node.args[1].args[0].args.length == 2 &&
-            node.args[0].args[0].args[0].type == 'ConstantNode' &&
-            node.args[1].args[0].args[0].type == 'ConstantNode') {
-            console.log('Constants can be combined');
-            //debugger;
-            return true;
-          }
-          // layout 2
-          if (node.args[0].type == 'OperatorNode' &&
-            node.args[1].type == 'OperatorNode' &&
-            node.args[0].args.length == 2 &&
-            node.args[1].args.length == 3 &&
-            node.args[0].args[0].type == 'OperatorNode' &&
-            node.args[0].args[0].args.length == 2 &&
-            node.args[0].args[0].args[0].type == 'ConstantNode' &&
-            node.args[1].args[0].type == 'ConstantNode') {
-            console.log('Constants can be combined');
-            //debugger;
-            return true;
-          }
-          // layout 3
-          if (node.args[0].type == 'OperatorNode' &&
-            node.args[1].type == 'OperatorNode' &&
-            node.args[0].args.length == 3 &&
-            node.args[1].args.length == 2 &&
-            node.args[1].args[0].type == 'OperatorNode' &&
-            node.args[1].args[0].args.length == 2 &&
-            node.args[0].args[0].type == 'ConstantNode' &&
-            node.args[1].args[0].args[0].type == 'ConstantNode') {
-            console.log('Constants can be combined');
-            //debugger;
-            return true;
-          }
+        if (this.hasLikeCoefficients(Object.values(terms)[i])) {
+          return true;
+        }
+        if (this.hasLikeCoefficients(Object.values(node.args)[i])) {
+          return true;
         }
         return false;
     }
@@ -3141,61 +3227,9 @@ LikeTermCollector.collectLikeTerms = function(node) {
   }
 
   //altered - START
-  // layout 1
-  if (node.args.length == 2) {
-    if (node.args[0].type == 'OperatorNode' &&
-      node.args[1].type == 'OperatorNode' &&
-      node.args[0].args.length == 2 &&
-      node.args[1].args.length == 2 &&
-      node.args[0].args[0].type == 'OperatorNode' &&
-      node.args[1].args[0].type == 'OperatorNode' &&
-      node.args[0].args[0].args.length == 2 &&
-      node.args[1].args[0].args.length == 2 &&
-      node.args[0].args[0].args[0].type == 'ConstantNode' &&
-      node.args[1].args[0].args[0].type == 'ConstantNode') {
-      const newNode = node.cloneDeep();
-      //debugger
-      newNode.args[0].args[0].args[0].value = (Number(node.args[0].args[0].args[0].value) + Number(node.args[1].args[0].args[0].value)).toString();
-      newNode.args = newNode.args.slice(0, 1);
-      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[0].toString(), 'args', newNode.args);
-      return Node.Status.nodeChanged(
-        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
-    }
-    // layout 2
-    if (node.args[0].type == 'OperatorNode' &&
-      node.args[1].type == 'OperatorNode' &&
-      node.args[0].args.length == 2 &&
-      node.args[1].args.length == 3 &&
-      node.args[0].args[0].type == 'OperatorNode' &&
-      node.args[0].args[0].args.length == 2 &&
-      node.args[0].args[0].args[0].type == 'ConstantNode' &&
-      node.args[1].args[0].type == 'ConstantNode') {
-      const newNode = node.cloneDeep();
-      //debugger;
-      newNode.args[0].args[0].args[0].value = (Number(node.args[0].args[0].args[0].value) + Number(node.args[1].args[0].value)).toString();
-      newNode.args = newNode.args.slice(0, 1);
-      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[0].toString(), 'args', newNode.args);
-      return Node.Status.nodeChanged(
-        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
-    }
-    // layout 3
-    if (node.args[0].type == 'OperatorNode' &&
-      node.args[1].type == 'OperatorNode' &&
-      node.args[0].args.length == 3 &&
-      node.args[1].args.length == 2 &&
-      node.args[1].args[0].type == 'OperatorNode' &&
-      node.args[1].args[0].args.length == 2 &&
-      node.args[0].args[0].type == 'ConstantNode' &&
-      node.args[1].args[0].args[0].type == 'ConstantNode') {
-      console.log('Constants can be combined');
-      const newNode = node.cloneDeep();
-      //debugger;
-      newNode.args[0].args[0].value = (Number(node.args[0].args[0].value) + Number(node.args[1].args[0].args[0].value)).toString();
-      newNode.args = newNode.args.slice(0, 1);
-      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[0].toString(), 'args', newNode.args);
-      return Node.Status.nodeChanged(
-        ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
-    }
+  const alterNode = LikeTermCollector.combineLikeCoefficients(node);
+  if (alterNode != node) {
+    return alterNode;
   }
   //altered - END
 
