@@ -3037,6 +3037,8 @@ const LikeTermCollector = {};
 
 // altered - START
 LikeTermCollector.hasLikeCoefficients = function (term) {
+
+  //debugger;
   
   if (term && term.length == 2) {
 
@@ -3087,7 +3089,7 @@ LikeTermCollector.hasLikeCoefficients = function (term) {
 }
 LikeTermCollector.combineLikeCoefficients = function (node) {
 
-  console.log('LikeTermCollector.combineLikeCoefficients', node.args);
+  console.log('LikeTermCollector.combineLikeCoefficients', print.ascii(node));
   for (let i = 0; i < node.args.length; i++) {
     console.log('arg'+i, node.args[i].toString());
     for (let j = i + 1; j < node.args.length; j++) {
@@ -3159,6 +3161,7 @@ LikeTermCollector.combineLikeCoefficients = function (node) {
 // Given an expression tree, returns true if there are terms that can be
 // collected
 LikeTermCollector.canCollectLikeTerms = function(node) {
+  console.log('canCollectLikeTerms:', print.ascii(node));
   // We can collect like terms through + or through *
   // Note that we never collect like terms with - or /, those expressions will
   // always be manipulated in flattenOperands so that the top level operation is
@@ -3193,6 +3196,19 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
   if (result) {
     return true;
   }
+  console.log('node.type=', node.type, 'node.op=', node.op, 'arg0.type=', node.args[0].type, 'arg1.type=', node.args[1].type, print.ascii(node));
+  if (node.type == 'OperatorNode' &&
+    node.args[0].type == 'SymbolNode' &&
+    node.args[1].type == 'ConstantNode') {
+    console.log('ignore');
+    return false;
+  }
+  if (node.type == 'OperatorNode' &&
+    node.args[0].type == 'OperatorNode' &&
+    node.args[1].type == 'ConstantNode') {
+    console.log('ignore');
+    return false;
+  }
   const termKeys = termTypes.toString();
   const termValues = Object.values(terms).toString();
   const sortedTermValues = Object.values(terms).sort(sortTerms).toString();
@@ -3214,9 +3230,10 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
         return false;
     }
   }
-  //console.log('sortedTermValues', sortedTermValues);
   if (termValues !== sortedTermValues) {
-    //console.log('Keys=', termKeys, 'Values=', termValues);
+    console.log('sortedTermValues', sortedTermValues);
+    console.log('Keys=', termKeys, 'Values=', termValues);
+    //debugger;
     return true; //converts 3 * h * a to 3 * a * h
   }
   return false;
