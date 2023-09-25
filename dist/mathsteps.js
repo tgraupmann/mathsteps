@@ -3,17 +3,19 @@ const ChangeTypes = require('./lib/ChangeTypes');
 const factor = require('./lib/factor');
 const simplifyExpression = require('./lib/simplifyExpression');
 const solveEquation = require('./lib/solveEquation');
+const printNode = require('./lib/util/print');
 
 module.exports = {
   factor,
   simplifyExpression,
   solveEquation,
   ChangeTypes,
+  printNode,
 };
 
 window.mathsteps = module.exports;
 
-},{"./lib/ChangeTypes":2,"./lib/factor":21,"./lib/simplifyExpression":65,"./lib/solveEquation":69}],2:[function(require,module,exports){
+},{"./lib/ChangeTypes":2,"./lib/factor":21,"./lib/simplifyExpression":65,"./lib/solveEquation":69,"./lib/util/print":74}],2:[function(require,module,exports){
 // The text to identify rules for each possible step that can be taken
 
 module.exports = {
@@ -3406,9 +3408,9 @@ function getTermsForCollectingMultiplication(node) {
       throw Error('Unsupported node type: ' + child.type);
     }
   }
-  console.log('getTermsForCollectingMultiplication', Object.values(terms).toString())
+console.log('getTermsForCollectingMultiplication', Object.values(terms).toString())
   return terms;
-  //const sortedTermValues = Object.values(terms).sort(sortTerms);
+//const sortedTermValues = Object.values(terms).sort(sortTerms);
   //return sortedTermValues;
 }
 

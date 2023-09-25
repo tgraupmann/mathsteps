@@ -31,7 +31,7 @@
 
         let content = `<table border="1">`;
 
-        content += `<tr align="center"><td colspan="4">`
+        content += `<tr align="center"><td colspan="5">`
         content += formula;
         content += `</td></tr>`;
 
@@ -39,6 +39,7 @@
                         <td>Before Change</td>
                         <td>Change</td>
                         <td>After Change</td>
+                        <td>Latex</td>
                         <td># of Substeps</td>
                     </tr>`;
 
@@ -48,7 +49,8 @@
             content += `<tr>`;
             content += `<td>` + step.oldNode.toString() + `</td>`;
             content += `<td>` + step.changeType + `</td>`;
-            content += `<td>` + step.newNode.toString() + `</td>`;
+            content += `<td>` + mathsteps.printNode.ascii(step.newNode) + `</td>`;
+            content += `<td>` + step.newNode.toTex() + `</td>`;
             content += `<td>` + step.substeps.length + `</td>`;
         });
 

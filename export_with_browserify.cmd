@@ -1,3 +1,3 @@
 CALL npm install
 MKDIR dist
-CALL browserify index.js -o dist/mathsteps.js
+CALL browserify index-browserify.js -o dist/mathsteps.js
