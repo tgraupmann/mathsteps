@@ -3196,16 +3196,30 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
   if (result) {
     return true;
   }
-  console.log('node.type=', node.type, 'node.op=', node.op, 'arg0.type=', node.args[0].type, 'arg1.type=', node.args[1].type, print.ascii(node));
-  if (node.type == 'OperatorNode' &&
-    node.args[0].type == 'SymbolNode' &&
-    node.args[1].type == 'ConstantNode') {
+  console.log('node.type=', node.type, 'node.op=', node.op, 'arg0.type=', node.args[0].type, 'arg0.op=', node.args[0].op, 'arg1.type=', node.args[1].type, 'arg1.op=', node.args[1].op, print.ascii(node));
+  if (node.type === 'OperatorNode' &&
+    node.args[0].type === 'SymbolNode' &&
+    node.args[1].type === 'ConstantNode') {
     console.log('ignore');
     return false;
   }
-  if (node.type == 'OperatorNode' &&
-    node.args[0].type == 'OperatorNode' &&
-    node.args[1].type == 'ConstantNode') {
+  if (node.type === 'OperatorNode' &&
+    node.args[0].type === 'OperatorNode' &&
+    node.args[1].type === 'ConstantNode') {
+    console.log('ignore');
+    return false;
+  }
+  if (node.type === 'OperatorNode' &&
+    node.args[0].type === 'ParenthesisNode' &&
+    node.args[1].type === 'ParenthesisNode') {
+    console.log('ignore');
+    return false;
+  }
+  if (node.type === 'OperatorNode' &&
+    //node.op == '+' &&
+    node.args[0].op === '^' &&
+    node.args[0].type === 'OperatorNode' &&
+    node.args[1].type === 'OperatorNode') {
     console.log('ignore');
     return false;
   }
