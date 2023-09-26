@@ -11,13 +11,51 @@
 
 <script>
 
+    function doUnitTests() {
+        function assertAreEqual(formula, actual, expected) {
+            if (actual === expected) {
+                console.log(`Test [PASSED]`, `formula`, formula, `actual`, actual, `===`, `expected`, expected);
+            } else {
+                console.error('Test [FAILED]', `formula`, formula);
+                console.error(" Test Actual: ", actual);
+                console.error(" Test Expected: ", expected);
+            }
+            //debugger;
+        };
+
+        function testMathsteps(formula, expected) {
+            const steps = mathsteps.simplifyExpression(formula);
+            assertAreEqual(formula, mathsteps.printNode.ascii(steps[steps.length - 1].newNode), expected);
+        }
+
+        testMathsteps(`(((x^4)^0.25)^2)^0.5`, `x`);
+        testMathsteps(`(x^2)^0.5`, `x`);
+        testMathsteps(`(x^0.5)^2`, `x`);
+        testMathsteps(`(a + 2)*(a + 3)`, `a^2 + 5a + 6`);
+        testMathsteps(`2 * a * b^2 + 3 * b^2 * a`, `5a * b^2`);
+        testMathsteps(`2 * a^2 * b + 3 * b * a^2`, `5a^2 * b`);
+        testMathsteps(`(a + 2)*(b - 3)`, `a * b - 3a + 2b - 6`);
+        testMathsteps(`3(a + h)^2 + 2(a + h) - 1`, `3a^2 + 6a * h + 3h^2 + 2a + 2h - 1`);
+        testMathsteps(`3 * a ^ 2 + 3 * a * h + 3 * a * h + 3 * h ^ 2 + 2 * a + 2 * h - 1`, `3a^2 + 6a * h + 3h^2 + 2a + 2h - 1`);
+        testMathsteps(`3 * a ^ 2 + 3 * a * h + 3 * h * a + 3 * h ^ 2 + 2 * a + 2 * h - 1`, `3a^2 + 6a * h + 3h^2 + 2a + 2h - 1`);
+        testMathsteps(`2 * a * b + 4 * a * b`, `6a * b`);
+        testMathsteps(`2*b*a + 4*a*b`, `6 * a * b`);
+        testMathsteps(`2*a + 3*a`, `5a`);
+        testMathsteps(`2 * a * b + 3 * a * b`, `5a * b`);
+        testMathsteps(`2 * a * b + 3 * b * a`, `5a * b`);
+    }
+    doUnitTests();
+
     function doExample1() {
 
         const example1 = document.getElementById('example1');
 
         //TODO: FIX
         //WORKS:
-        const formula = `(a + 2)*(a + 3)`; // should result as a ^ 2 + 5 * a + 6
+        const formula = `(((x^4)^0.25)^2)^0.5`; // should result as 2
+        //const formula = `(x^2)^0.5`; // should result as 2
+        //const formula = `(x^0.5)^2`; // should result as 2
+        //const formula = `(a + 2)*(a + 3)`; // should result as a ^ 2 + 5 * a + 6
         //const formula = `2 * a * b^2 + 3 * b^2 * a`; // should result as 5 * a * b ^ 2
         //const formula = `2 * a^2 * b + 3 * b * a^2`; // should result as 5 * a ^ 2 * b
         //const formula = `(a + 2)*(b - 3)`; // should result as a * b - 3 * a + 2 * b - 6

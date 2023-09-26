@@ -7592,11 +7592,61 @@ function removeUnnecessaryParens(node, rootNode=false) {
   return removeUnnecessaryParensSearch(node);
 }
 
+function printInfo(indent, label, node) {
+  console.log(indent + label, 'type=', node.type, '=op', node.op, 'value=', node.value, 'args=', node.args ? node.args.length : 0, 'toString=', node.toString());
+}
+
+function printNodeInfo(indent, label, node) {
+  printInfo(indent, label, node)
+  if (node.content) {
+    printNodeInfo(indent + ' ', 'content', node.content)
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; ++i) {
+      printNodeInfo(indent + ' ', 'arg' + i, node.args[i]);    
+    }
+  }
+}
+
+function isConstantPower(node) {
+  console.log('isConstantPower', node);
+  printNodeInfo('', 'node', node);
+  if (node.type === 'OperatorNode' &&
+    node.op === '^' &&
+    node.args &&
+    node.args.length == 2 &&
+    node.args[0].type === 'ParenthesisNode' &&
+    node.args[0].content &&
+    node.args[0].content.type === 'OperatorNode' &&
+    node.args[0].content.op === '^' &&
+    //node.args[0].content.args[0].type === 'ConstantNode' &&
+    node.args[0].content.args[1].type === 'ConstantNode' &&
+    node.args[1].type === 'ConstantNode') {
+    return true;
+  }
+  return false;
+}
+
 // Recursively moves parenthesis around nodes that can't be resolved further if
 // it doesn't change the value of the expression. Returns a node.
 // NOTE: after this function is called, every parenthesis node in the
 // tree should always have an operator node or unary minus as its child.
-function removeUnnecessaryParensSearch(node) {
+function removeUnnecessaryParensSearch(node) {  
+  // alter - START
+  if (isConstantPower(node)) {
+    let newNode = node.cloneDeep();
+    newNode = newNode.args[0];
+    newNode.content.args[1].value = (Number(node.args[0].content.args[1].value) * Number(node.args[1].value)).toString();
+    newNode.args = [];
+    printNodeInfo('', 'newNode', newNode);
+    //debugger;
+    return removeUnnecessaryParensInOperatorNode(newNode);
+    return Node.Status.nodeChanged(
+      //ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+      'SIMPLIFY_ARITHMETIC', node, newNode, false);
+  }
+  // alter - END
+
   if (Node.Type.isOperator(node)) {
     return removeUnnecessaryParensInOperatorNode(node);
   }
