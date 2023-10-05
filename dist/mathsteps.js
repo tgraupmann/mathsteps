@@ -769,7 +769,7 @@ function hasChildCosineResolvesToConstant(node) {
   //console.log('hasChildCosineResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
   if (Node.Type.isFunction(node) && node.name === 'cos') {
     //debugger;
-    console.log('Found Cosine=', node.toString());
+    //console.log('Found Cosine=', node.toString());
     return true;
   }
   if (node.args) {
@@ -3127,9 +3127,9 @@ LikeTermCollector.hasLikeCoefficients = function (term) {
 }
 LikeTermCollector.combineLikeCoefficients = function (node) {
 
-  console.log('LikeTermCollector.combineLikeCoefficients', print.ascii(node));
+  //console.log('LikeTermCollector.combineLikeCoefficients', print.ascii(node));
   for (let i = 0; i < node.args.length; i++) {
-    console.log('arg'+i, node.args[i].toString());
+    //console.log('arg'+i, node.args[i].toString());
     for (let j = i + 1; j < node.args.length; j++) {
       //debugger;
 
@@ -3144,12 +3144,12 @@ LikeTermCollector.combineLikeCoefficients = function (node) {
       node.args[j].args[0].args.length == 2 &&
       node.args[i].args[0].args[0].type == 'ConstantNode' &&
       node.args[j].args[0].args[0].type == 'ConstantNode') {
-      console.log('combineLikeCoefficients: layout1', 'Constants can be combined');
+      //console.log('combineLikeCoefficients: layout1', 'Constants can be combined');
       const newNode = node.cloneDeep();
       //debugger
       newNode.args[i].args[0].args[0].value = (Number(node.args[i].args[0].args[0].value) + Number(node.args[j].args[0].args[0].value)).toString();
       newNode.args.splice(j, 1); // remove j
-      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
+      //console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
       return Node.Status.nodeChanged(
         ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
     }
@@ -3162,7 +3162,7 @@ LikeTermCollector.combineLikeCoefficients = function (node) {
       node.args[i].args[0].args.length == 2 &&
       node.args[i].args[0].args[0].type == 'ConstantNode' &&
       node.args[j].args[0].type == 'ConstantNode') {
-      console.log('combineLikeCoefficients: layout2', 'Constants can be combined');
+      //console.log('combineLikeCoefficients: layout2', 'Constants can be combined');
       const newNode = node.cloneDeep();
       //debugger;
       newNode.args[i].args[0].args[0].value = (Number(node.args[i].args[0].args[0].value) + Number(node.args[j].args[0].value)).toString();
@@ -3180,12 +3180,12 @@ LikeTermCollector.combineLikeCoefficients = function (node) {
       node.args[j].args[0].args.length == 2 &&
       node.args[i].args[0].type == 'ConstantNode' &&
       node.args[j].args[0].args[0].type == 'ConstantNode') {
-        console.log('combineLikeCoefficients: layout3', 'Constants can be combined');
+        //console.log('combineLikeCoefficients: layout3', 'Constants can be combined');
         const newNode = node.cloneDeep();
         //debugger;
         newNode.args[i].args[0].value = (Number(node.args[i].args[0].value) + Number(node.args[j].args[0].args[0].value)).toString();
         newNode.args.splice(j, 1); // remove j
-        console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
+        //console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
         return Node.Status.nodeChanged(
           ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
       }
@@ -3199,7 +3199,7 @@ LikeTermCollector.combineLikeCoefficients = function (node) {
 // Given an expression tree, returns true if there are terms that can be
 // collected
 LikeTermCollector.canCollectLikeTerms = function(node) {
-  console.log('canCollectLikeTerms:', print.ascii(node));
+  //console.log('canCollectLikeTerms:', print.ascii(node));
   // We can collect like terms through + or through *
   // Note that we never collect like terms with - or /, those expressions will
   // always be manipulated in flattenOperands so that the top level operation is
@@ -3234,23 +3234,23 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
   if (result) {
     return true;
   }
-  console.log('node.type=', node.type, 'node.op=', node.op, 'arg0.type=', node.args[0].type, 'arg0.op=', node.args[0].op, 'arg1.type=', node.args[1].type, 'arg1.op=', node.args[1].op, print.ascii(node));
+  //console.log('node.type=', node.type, 'node.op=', node.op, 'arg0.type=', node.args[0].type, 'arg0.op=', node.args[0].op, 'arg1.type=', node.args[1].type, 'arg1.op=', node.args[1].op, print.ascii(node));
   if (node.type === 'OperatorNode' &&
     node.args[0].type === 'SymbolNode' &&
     node.args[1].type === 'ConstantNode') {
-    console.log('ignore');
+    //console.log('ignore');
     return false;
   }
   if (node.type === 'OperatorNode' &&
     node.args[0].type === 'OperatorNode' &&
     node.args[1].type === 'ConstantNode') {
-    console.log('ignore');
+    //console.log('ignore');
     return false;
   }
   if (node.type === 'OperatorNode' &&
     node.args[0].type === 'ParenthesisNode' &&
     node.args[1].type === 'ParenthesisNode') {
-    console.log('ignore');
+    //console.log('ignore');
     return false;
   }
   if (node.type === 'OperatorNode' &&
@@ -3258,20 +3258,20 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
     node.args[0].op === '^' &&
     node.args[0].type === 'OperatorNode' &&
     node.args[1].type === 'OperatorNode') {
-    console.log('ignore');
+    //console.log('ignore');
     return false;
   }
   const termKeys = termTypes.toString();
   const termValues = Object.values(terms).toString();
   const sortedTermValues = Object.values(terms).sort(sortTerms).toString();
   //console.log('Keys=', termKeys, 'Values=', termValues);
-  console.log('termValues=', termValues, 'sortedTermValues=', sortedTermValues);
+  //console.log('termValues=', termValues, 'sortedTermValues=', sortedTermValues);
   for (let i = 0; i < termTypes.length; ++i) {
     //console.log('TermType=', termTypes[i]);
     switch (termTypes[i]) {
       case 'other':
-        console.log('Node string', node.toString());
-        console.log('Node Formula', print.ascii(node));
+        //console.log('Node string', node.toString());
+        //console.log('Node Formula', print.ascii(node));
         //debugger;
         if (this.hasLikeCoefficients(Object.values(terms)[i])) {
           return true;
@@ -3477,7 +3477,7 @@ function getTermsForCollectingMultiplication(node) {
       throw Error('Unsupported node type: ' + child.type);
     }
   }
-console.log('getTermsForCollectingMultiplication', Object.values(terms).toString())
+  //console.log('getTermsForCollectingMultiplication', Object.values(terms).toString())
   return terms;
 //const sortedTermValues = Object.values(terms).sort(sortTerms);
   //return sortedTermValues;
@@ -6172,7 +6172,7 @@ function simplifyExpressionString(expressionString, debug=false) {
     return [];
   }
   if (exprNode) {
-    console.log('simplifyExpressionString:');
+    //console.log('simplifyExpressionString:');
     return stepThrough(exprNode, debug);
   }
   return [];
@@ -6426,6 +6426,21 @@ function step(node) {
         return Node.Status.nodeChanged(
           'SIMPLIFY_ARITHMETIC', node, newNode, false);
       }
+    } else {
+      //debugger;
+      const newNode = node.cloneDeep();
+      findResult = findFunctionCosine(null, null, newNode);
+      const altNode = Node.Creator.constant(Math.PI);
+      findResult.parent.args[findResult.index] = altNode;
+      //debugger;
+      //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
+      
+      //console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
+
+      //return Node.Status.nodeChanged(
+      //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+      return Node.Status.nodeChanged(
+        'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }
   }
   
