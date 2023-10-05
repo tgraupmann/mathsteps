@@ -3091,7 +3091,7 @@ LikeTermCollector.hasLikeCoefficients = function (term) {
       term[1].args[0].args.length == 2 &&
       term[0].args[0].args[0].type == 'ConstantNode' &&
       term[1].args[0].args[0].type == 'ConstantNode') {
-      console.log('hasLikeCoefficients: layout1', 'Constants can be combined');
+      //console.log('hasLikeCoefficients: layout1', 'Constants can be combined');
       //debugger;
       return true;
     }
@@ -3104,7 +3104,7 @@ LikeTermCollector.hasLikeCoefficients = function (term) {
       term[0].args[0].args.length == 2 &&
       term[0].args[0].args[0].type == 'ConstantNode' &&
       term[1].args[0].type == 'ConstantNode') {
-      console.log('hasLikeCoefficients: layout2', 'Constants can be combined');
+      //console.log('hasLikeCoefficients: layout2', 'Constants can be combined');
       //debugger;
       return true;
     }
@@ -3117,7 +3117,7 @@ LikeTermCollector.hasLikeCoefficients = function (term) {
       term[1].args[0].args.length == 2 &&
       term[0].args[0].type == 'ConstantNode' &&
       term[1].args[0].args[0].type == 'ConstantNode') {
-      console.log('hasLikeCoefficients: layout3', 'Constants can be combined');
+      //console.log('hasLikeCoefficients: layout3', 'Constants can be combined');
       //debugger;
       return true;
     }
@@ -3167,7 +3167,7 @@ LikeTermCollector.combineLikeCoefficients = function (node) {
       //debugger;
       newNode.args[i].args[0].args[0].value = (Number(node.args[i].args[0].args[0].value) + Number(node.args[j].args[0].value)).toString();
       newNode.args.splice(j, 1); // remove j
-      console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
+      //console.log('Combine constants newNode', newNode.args.toString(), 'arg1=', newNode.args[i].toString(), 'args', newNode.args);
       return Node.Status.nodeChanged(
         ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
     }
@@ -3283,8 +3283,8 @@ LikeTermCollector.canCollectLikeTerms = function(node) {
     }
   }
   if (termValues !== sortedTermValues) {
-    console.log('sortedTermValues', sortedTermValues);
-    console.log('Keys=', termKeys, 'Values=', termValues);
+    //console.log('sortedTermValues', sortedTermValues);
+    //console.log('Keys=', termKeys, 'Values=', termValues);
     //debugger;
     return true; //converts 3 * h * a to 3 * a * h
   }
@@ -7779,7 +7779,7 @@ function removeUnnecessaryParensSearch(node) {
     newNode = newNode.args[0];
     newNode.content.args[1].value = (Number(node.args[0].content.args[1].value) * Number(node.args[1].value)).toString();
     newNode.args = [];
-    printNodeInfo('', 'newNode', newNode);
+    //printNodeInfo('', 'newNode', newNode);
     //debugger;
     return removeUnnecessaryParensInOperatorNode(newNode);
     return Node.Status.nodeChanged(

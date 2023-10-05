@@ -13,7 +13,7 @@
 
     function doUnitTests() {
         function assertAreEqual(formula, actual, expected) {
-            if (actual === expected) {
+            if (actual.toString() === expected.toString()) {
                 console.log(`Test [PASSED]`, `formula`, formula, `actual`, actual, `===`, `expected`, expected);
             } else {
                 console.error('Test [FAILED]', `formula`, formula);
@@ -28,6 +28,13 @@
             assertAreEqual(formula, mathsteps.printNode.ascii(steps[steps.length - 1].newNode), expected);
         }
 
+        testMathsteps(`25 - 4 * 2 + 3`, `20`);
+        testMathsteps(`8 * cos(\pi+0.1) + 10`, `2.04`);
+        testMathsteps(`8 * cos(\pi) + 10`, `2`);
+        testMathsteps(`cos(\pi)`, `-1`);
+        testMathsteps(`cos(2 * \pi)`, `0.9999999998920606`);
+        testMathsteps(`cos(3)`, `-0.9899924966004454`);
+        testMathsteps(`cos(\pi + 1)`, `-0.5402961240625279`);
         testMathsteps(`(((x^4)^0.25)^2)^0.5`, `x`);
         testMathsteps(`(x^2)^0.5`, `x`);
         testMathsteps(`(x^0.5)^2`, `x`);
@@ -44,7 +51,6 @@
         testMathsteps(`2 * a * b + 3 * a * b`, `5a * b`);
         testMathsteps(`2 * a * b + 3 * b * a`, `5a * b`);
     }
-    //doUnitTests();
 
     function doExample1() {
 
@@ -52,7 +58,8 @@
 
         //TODO: FIX
         //WORKS:
-        const formula = '8 * cos(\pi+0.1) + 10';
+        const formula = '25 - 4 * 2 + 3';
+        //const formula = '8 * cos(\pi+0.1) + 10';
         //const formula = '8 * cos(\pi) + 10'; // should be 2
         //const formula = `cos(\pi)`;
         //const formula = `cos(2 * \pi)`;
@@ -74,7 +81,7 @@
         //const formula = `2 * a * b + 3 * a * b`; // should result as 5 * a * b
         //const formula = `2 * a * b + 3 * b * a`; // should result as 5 * a * b
 
-        console.log('formula', formula);
+        //console.log('formula', formula);
 
         let content = `<table border="1">`;
 
@@ -93,7 +100,7 @@
 
         const steps = mathsteps.simplifyExpression(formula);
 
-        console.log(steps);
+        //console.log(steps);
 
         content += `<tr align="center"><td colspan="5">`
         content += 'Steps: ' + steps.length;
@@ -114,6 +121,8 @@
     }
 
     doExample1();
+
+    doUnitTests();
 
 </script>
 
