@@ -13,7 +13,8 @@
 
     function doUnitTests() {
         function assertAreEqual(formula, actual, expected) {
-            if (actual.toString() === expected.toString()) {
+            if ((actual == null && expected == null) ||
+                actual.toString() === expected.toString()) {
                 console.log(`Test [PASSED]`, `formula`, formula, `actual`, actual, `===`, `expected`, expected);
             } else {
                 console.error('Test [FAILED]', `formula`, formula);
@@ -25,9 +26,16 @@
 
         function testMathsteps(formula, expected) {
             const steps = mathsteps.simplifyExpression(formula);
-            assertAreEqual(formula, mathsteps.printNode.ascii(steps[steps.length - 1].newNode), expected);
+            if (steps.length == 0) {
+                assertAreEqual(formula, null, null);
+            } else {
+                assertAreEqual(formula, mathsteps.printNode.ascii(steps[steps.length - 1].newNode), expected);
+            }
         }
 
+        testMathsteps(`10*\sqrt(25)+20`, `70`);
+        testMathsteps(`10*\sqrt(x)+20`, null);
+        testMathsteps(`\sqrt(100)`, `10`);
         testMathsteps(`25 - 4 * 2 + 3`, `20`);
         testMathsteps(`8 * cos(\pi+0.1) + 10`, `2.04`);
         testMathsteps(`8 * cos(\pi) + 10`, `2`);
@@ -57,8 +65,14 @@
         const example1 = document.getElementById('example1');
 
         //TODO: FIX
+        //const formula = '10*x^0.5+20';
         //WORKS:
-        const formula = '25 - 4 * 2 + 3';
+        const formula = '10 * \sqrt(25) + 20';
+        //const formula = '10*\sqrt(x)+20';
+        //const formula = '\sqrt(100)';
+        //const formula = '10 * 100^0.5 + 20';
+        //const formula = '10 * 25^0.5 + 20';
+        //const formula = '25 - 4 * 2 + 3';
         //const formula = '8 * cos(\pi+0.1) + 10';
         //const formula = '8 * cos(\pi) + 10'; // should be 2
         //const formula = `cos(\pi)`;

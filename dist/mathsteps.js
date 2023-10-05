@@ -783,6 +783,24 @@ function hasChildCosineResolvesToConstant(node) {
   return false;
 }
 
+function hasChildSqrtResolvesToConstant(node) {
+  //console.log('hasChildSqrtResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
+  if (Node.Type.isFunction(node) && node.name === 'sqrt') {
+    //debugger;
+    //console.log('Found Sqrt=', node.toString());
+    return true;
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      //console.log('arg'+i, node.args[i].toString());
+      if (hasChildSqrtResolvesToConstant(node.args[i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 function hasUnsupportedNodes(node) {
   if (Node.Type.isParenthesis(node)) {
     return hasUnsupportedNodes(node.content);
@@ -810,6 +828,8 @@ function hasUnsupportedNodes(node) {
   } else if (hasChildSymbolResolvesToConstant(node)) {
     return false;
   } else if (hasChildCosineResolvesToConstant(node)) {
+    return false;
+  } else if (hasChildSqrtResolvesToConstant(node)) {
     return false;
   } else {
     return true;
@@ -6359,6 +6379,26 @@ function findFunctionCosine(parent, arg, node) {
   return null;
 }
 
+function findFunctionNamed(name, parent, arg, node) {
+  if (Node.Type.isFunction(node) && node.name === name) {
+    return {
+      'find': node,
+      'index': arg,
+      'parent': parent,
+    };
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      //console.log('arg'+i, node.args[i].toString());
+      let searchResult = findFunctionNamed(name, node, i, node.args[i]);
+      if (searchResult) {
+        return searchResult;
+      }
+    }
+  }
+  return null;
+}
+
 // Given a mathjs expression node, performs a single step to simplify the
 // expression. Returns a Node.Status object.
 function step(node) {
@@ -6436,6 +6476,43 @@ function step(node) {
         const newNode = node.cloneDeep();
         findResult = findFunctionCosine(null, null, newNode);
         const altNode = Node.Creator.constant(Math.cos(findResult.find.args[0].value));
+        findResult.parent.args[findResult.index] = altNode;
+        //debugger;
+        //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
+        
+        //console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
+
+        //return Node.Status.nodeChanged(
+        //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+        return Node.Status.nodeChanged(
+          'SIMPLIFY_ARITHMETIC', node, newNode, false);
+      }
+    }
+  }
+
+  findResult = findFunctionNamed('sqrt', null, null, node);
+  if (findResult) {
+    //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+    if (!findResult.parent) {
+      if (findResult.find.args && 
+        findResult.find.args.length == 1 &&
+        Node.Type.isConstant(findResult.find.args[0])) {
+        //debugger;
+        //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+        //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
+        const newNode = Node.Creator.constant(Math.sqrt(node.args[0].value));
+        return Node.Status.nodeChanged(
+          'SIMPLIFY_ARITHMETIC', node, newNode, false);
+      }
+    } else {
+      //console.log('***** Find Node:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+      //debugger;
+      if (Node.Type.isFunction(findResult.find) &&
+        Node.Type.isConstant(findResult.find.args[0])) {
+        //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type);
+        const newNode = node.cloneDeep();
+        findResult = findFunctionNamed('sqrt', null, null, newNode);
+        const altNode = Node.Creator.constant(Math.sqrt(findResult.find.args[0].value));
         findResult.parent.args[findResult.index] = altNode;
         //debugger;
         //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
