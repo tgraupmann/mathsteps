@@ -748,6 +748,25 @@ module.exports = canSimplifyPolynomialTerms;
 const Node = require('../node');
 const resolvesToConstant = require('./resolvesToConstant');
 
+function hasChildResolvesToConstant(node) {
+  //console.log('hasChildResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
+  if (Node.Type.isSymbol(node) && node.name === 'pi') {
+    node.value = Math.PI;
+    console.log('newNode=', node.toString());
+    //debugger;
+    return true;
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      console.log('arg'+i, node.args[i].toString());
+      if (hasChildResolvesToConstant(node.args[i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 function hasUnsupportedNodes(node) {
   if (Node.Type.isParenthesis(node)) {
     return hasUnsupportedNodes(node.content);
@@ -773,7 +792,9 @@ function hasUnsupportedNodes(node) {
   else if (Node.Type.isFunction(node, 'nthRoot')) {
     return node.args.some(hasUnsupportedNodes) || node.args.length < 1;
   }
-  else {
+  else if (hasChildResolvesToConstant(node)) {
+    return false;
+  } else {
     return true;
   }
 }
@@ -6134,6 +6155,7 @@ function simplifyExpressionString(expressionString, debug=false) {
     return [];
   }
   if (exprNode) {
+    console.log('simplifyExpressionString:');
     return stepThrough(exprNode, debug);
   }
   return [];
@@ -6244,18 +6266,19 @@ function stepThrough(node, debug=false) {
     // eslint-disable-next-line
     console.log('\n\nSimplifying: ' + print.ascii(node, false, true));
   }
-
+  
+  console.log('stepThrough:', node);
   if (checks.hasUnsupportedNodes(node)) {
     return [];
   }
-
+  
   let nodeStatus;
   const steps = [];
-
+  
   const originalExpressionStr = print.ascii(node);
   const MAX_STEP_COUNT = 20;
   let iters = 0;
-
+  
   // Now, step through the math expression until nothing changes
   nodeStatus = step(node);
   while (nodeStatus.hasChanged()) {
@@ -6263,9 +6286,10 @@ function stepThrough(node, debug=false) {
       logSteps(nodeStatus);
     }
     steps.push(removeUnnecessaryParensInStep(nodeStatus));
-
+    
     node = Status.resetChangeGroups(nodeStatus.newNode);
     nodeStatus = step(node);
+    
 
     if (iters++ === MAX_STEP_COUNT) {
       // eslint-disable-next-line
@@ -6278,10 +6302,32 @@ function stepThrough(node, debug=false) {
   return steps;
 }
 
+function findSymbolPi(parent, arg, node) {
+  if (Node.Type.isSymbol(node) && node.name === 'pi') {
+    return {
+      'find': node,
+      'index': arg,
+      'parent': parent,
+    };
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      console.log('arg'+i, node.args[i].toString());
+      let searchResult = findSymbolPi(node, i, node.args[i]);
+      if (searchResult) {
+        return searchResult;
+      }
+    }
+  }
+  return null;
+}
+
 // Given a mathjs expression node, performs a single step to simplify the
 // expression. Returns a Node.Status object.
 function step(node) {
   let nodeStatus;
+
+  console.log('step: node=', node.toString(), node);
 
   node = flattenOperands(node);
   node = removeUnnecessaryParens(node, true);
@@ -6310,8 +6356,29 @@ function step(node) {
     functionsSearch,
   ];
 
+  let findResult = findSymbolPi(null, null, node);
+  if (findResult) {
+    //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+    if (findResult.parent) {
+      const newNode = node.cloneDeep();
+      findResult = findSymbolPi(null, null, newNode);
+      const altNode = Node.Creator.constant(Math.PI);
+      findResult.parent.args[findResult.index] = altNode;
+      //debugger;
+      //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
+      
+      console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
+
+      //return Node.Status.nodeChanged(
+      //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+      return Node.Status.nodeChanged(
+        'SIMPLIFY_ARITHMETIC', node, newNode, false);
+    }
+  }
+  
   for (let i = 0; i < simplificationTreeSearches.length; i++) {
     nodeStatus = simplificationTreeSearches[i](node);
+    //console.log('simplificationTreeSearches[i]', simplificationTreeSearches[i](node).newNode.toString());
     // Always update node, since there might be changes that didn't count as
     // a step. Remove unnecessary parens, in case one a step results in more
     // parens than needed.

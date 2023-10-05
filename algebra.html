@@ -44,13 +44,14 @@
         testMathsteps(`2 * a * b + 3 * a * b`, `5a * b`);
         testMathsteps(`2 * a * b + 3 * b * a`, `5a * b`);
     }
-    doUnitTests();
+    //doUnitTests();
 
     function doExample1() {
 
         const example1 = document.getElementById('example1');
 
         //TODO: FIX
+        //const formula = `cos(3)`;
         const formula = `cos(\pi + 1)`;
         //WORKS:
         //const formula = `(((x^4)^0.25)^2)^0.5`; // should result as 2
@@ -69,6 +70,8 @@
         //const formula = `2 * a * b + 3 * a * b`; // should result as 5 * a * b
         //const formula = `2 * a * b + 3 * b * a`; // should result as 5 * a * b
 
+        console.log('formula', formula);
+
         let content = `<table border="1">`;
 
         content += `<tr align="center"><td colspan="5">`
@@ -85,6 +88,8 @@
                     </tr>`;
 
         const steps = mathsteps.simplifyExpression(formula);
+
+        console.log(steps);
 
         content += `<tr align="center"><td colspan="5">`
         content += 'Steps: ' + steps.length;
