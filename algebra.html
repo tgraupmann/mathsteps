@@ -51,8 +51,9 @@
         const example1 = document.getElementById('example1');
 
         //TODO: FIX
+        const formula = `cos(\pi + 1)`;
         //WORKS:
-        const formula = `(((x^4)^0.25)^2)^0.5`; // should result as 2
+        //const formula = `(((x^4)^0.25)^2)^0.5`; // should result as 2
         //const formula = `(x^2)^0.5`; // should result as 2
         //const formula = `(x^0.5)^2`; // should result as 2
         //const formula = `(a + 2)*(a + 3)`; // should result as a ^ 2 + 5 * a + 6
@@ -74,6 +75,7 @@
         content += formula;
         content += `</td></tr>`;
 
+        
         content += `<tr>
                         <td>Before Change</td>
                         <td>Change</td>
@@ -83,6 +85,10 @@
                     </tr>`;
 
         const steps = mathsteps.simplifyExpression(formula);
+
+        content += `<tr align="center"><td colspan="5">`
+        content += 'Steps: ' + steps.length;
+        content += `</td></tr>`;
 
         steps.forEach(step => {
             content += `<tr>`;
