@@ -33,6 +33,9 @@
             }
         }
 
+        testMathsteps(`10*\sqrt{25}+20`, `70`);
+        testMathsteps(`10*\sqrt{x}+20`, null);
+        testMathsteps(`\sqrt{100}`, `10`);
         testMathsteps(`10*\sqrt(25)+20`, `70`);
         testMathsteps(`10*\sqrt(x)+20`, null);
         testMathsteps(`\sqrt(100)`, `10`);
@@ -67,7 +70,8 @@
         //TODO: FIX
         //const formula = '10*x^0.5+20';
         //WORKS:
-        const formula = '10 * \sqrt(25) + 20';
+        const formula = '10 * \sqrt{25} + 20';
+        //const formula = '10 * \sqrt(25) + 20';
         //const formula = '10*\sqrt(x)+20';
         //const formula = '\sqrt(100)';
         //const formula = '10 * 100^0.5 + 20';
@@ -112,6 +116,7 @@
                         <td># of Substeps</td>
                     </tr>`;
 
+        //debugger;
         const steps = mathsteps.simplifyExpression(formula);
 
         //console.log(steps);

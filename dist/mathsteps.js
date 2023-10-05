@@ -802,6 +802,7 @@ function hasChildSqrtResolvesToConstant(node) {
 }
 
 function hasUnsupportedNodes(node) {
+  //debugger;
   if (Node.Type.isParenthesis(node)) {
     return hasUnsupportedNodes(node.content);
   }
@@ -6189,6 +6190,7 @@ function simplifyExpressionString(expressionString, debug=false) {
     exprNode = math.parse(expressionString);
   }
   catch (err) {
+    console.error('mathsteps failure to parse expressionString=', expressionString, 'error=', err);
     return [];
   }
   if (exprNode) {
@@ -25208,6 +25210,29 @@ function factory (type, config, load, typed) {
         getToken();
       }
 
+      if (token == '{') {
+        params = [];
+
+        openParams();
+        getToken();
+
+        if (token != '}') {
+          params.push(parseAssignment());
+
+          // parse a list with parameters
+          while (token == ',') {
+            getToken();
+            params.push(parseAssignment());
+          }
+        }
+
+        if (token != '}') {
+          throw createSyntaxError('Parenthesis } expected');
+        }
+        closeParams();
+        getToken();
+      }
+
       // create a new node handler
       //noinspection JSValidateTypes
       return new handler(params);
@@ -25255,7 +25280,7 @@ function factory (type, config, load, typed) {
   function parseAccessors (node, types) {
     var params;
 
-    while ((token == '(' || token == '[' || token == '.') &&
+    while ((token == '(' || token == '{' || token == '[' || token == '.') &&
         (!types || types.indexOf(token) !== -1)) {
       params = [];
 
@@ -25277,6 +25302,37 @@ function factory (type, config, load, typed) {
 
           if (token != ')') {
             throw createSyntaxError('Parenthesis ) expected');
+          }
+          closeParams();
+          getToken();
+
+          node = new FunctionNode(node, params);
+        }
+        else {
+          // implicit multiplication like (2+3)(4+5)
+          // don't parse it here but let it be handled by parseMultiplyDivide
+          // with correct precedence
+          return node;
+        }
+      }
+      else if (token == '{') {
+        if (node.isSymbolNode || node.isAccessorNode || node.isFunctionNode) {
+          // function invocation like fn(2, 3)
+          openParams();
+          getToken();
+
+          if (token != '}') {
+            params.push(parseAssignment());
+
+            // parse a list with parameters
+            while (token == ',') {
+              getToken();
+              params.push(parseAssignment());
+            }
+          }
+
+          if (token != '}') {
+            throw createSyntaxError('Parenthesis } expected');
           }
           closeParams();
           getToken();
