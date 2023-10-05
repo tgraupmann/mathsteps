@@ -752,7 +752,7 @@ function hasChildSymbolResolvesToConstant(node) {
   //console.log('hasChildSymbolResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
   if (Node.Type.isSymbol(node) && node.name === 'pi') {
     //debugger;
-    return true;
+        return true;
   }
   if (node.args) {
     for (let i = 0; i < node.args.length; i++) {
@@ -6422,25 +6422,31 @@ function step(node) {
         Node.Type.isConstant(findResult.find.args[0])) {
         //debugger;
         //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+        //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
         const newNode = Node.Creator.constant(Math.cos(node.args[0].value));
         return Node.Status.nodeChanged(
           'SIMPLIFY_ARITHMETIC', node, newNode, false);
       }
     } else {
+      //console.log('***** Find Node:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
       //debugger;
-      const newNode = node.cloneDeep();
-      findResult = findFunctionCosine(null, null, newNode);
-      const altNode = Node.Creator.constant(Math.PI);
-      findResult.parent.args[findResult.index] = altNode;
-      //debugger;
-      //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
-      
-      //console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
+      if (Node.Type.isFunction(findResult.find) &&
+        Node.Type.isConstant(findResult.find.args[0])) {
+        //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type);
+        const newNode = node.cloneDeep();
+        findResult = findFunctionCosine(null, null, newNode);
+        const altNode = Node.Creator.constant(Math.cos(findResult.find.args[0].value));
+        findResult.parent.args[findResult.index] = altNode;
+        //debugger;
+        //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
+        
+        //console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
 
-      //return Node.Status.nodeChanged(
-      //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
-      return Node.Status.nodeChanged(
-        'SIMPLIFY_ARITHMETIC', node, newNode, false);
+        //return Node.Status.nodeChanged(
+        //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+        return Node.Status.nodeChanged(
+          'SIMPLIFY_ARITHMETIC', node, newNode, false);
+      }
     }
   }
   
