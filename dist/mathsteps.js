@@ -748,18 +748,34 @@ module.exports = canSimplifyPolynomialTerms;
 const Node = require('../node');
 const resolvesToConstant = require('./resolvesToConstant');
 
-function hasChildResolvesToConstant(node) {
-  //console.log('hasChildResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
+function hasChildSymbolResolvesToConstant(node) {
+  //console.log('hasChildSymbolResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
   if (Node.Type.isSymbol(node) && node.name === 'pi') {
-    node.value = Math.PI;
-    console.log('newNode=', node.toString());
     //debugger;
     return true;
   }
   if (node.args) {
     for (let i = 0; i < node.args.length; i++) {
-      console.log('arg'+i, node.args[i].toString());
-      if (hasChildResolvesToConstant(node.args[i])) {
+      //console.log('arg'+i, node.args[i].toString());
+      if (hasChildSymbolResolvesToConstant(node.args[i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function hasChildCosineResolvesToConstant(node) {
+  //console.log('hasChildCosineResolvesToConstant:', 'type=', node.type, 'name=', node.name, 'value=', node.value, 'op=', node.op, node.toString(), node);
+  if (Node.Type.isFunction(node) && node.name === 'cos') {
+    //debugger;
+    console.log('Found Cosine=', node.toString());
+    return true;
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      //console.log('arg'+i, node.args[i].toString());
+      if (hasChildCosineResolvesToConstant(node.args[i])) {
         return true;
       }
     }
@@ -791,8 +807,9 @@ function hasUnsupportedNodes(node) {
   }
   else if (Node.Type.isFunction(node, 'nthRoot')) {
     return node.args.some(hasUnsupportedNodes) || node.args.length < 1;
-  }
-  else if (hasChildResolvesToConstant(node)) {
+  } else if (hasChildSymbolResolvesToConstant(node)) {
+    return false;
+  } else if (hasChildCosineResolvesToConstant(node)) {
     return false;
   } else {
     return true;
@@ -6267,7 +6284,7 @@ function stepThrough(node, debug=false) {
     console.log('\n\nSimplifying: ' + print.ascii(node, false, true));
   }
   
-  console.log('stepThrough:', node);
+  //console.log('stepThrough:', node);
   if (checks.hasUnsupportedNodes(node)) {
     return [];
   }
@@ -6312,8 +6329,28 @@ function findSymbolPi(parent, arg, node) {
   }
   if (node.args) {
     for (let i = 0; i < node.args.length; i++) {
-      console.log('arg'+i, node.args[i].toString());
+      //console.log('arg'+i, node.args[i].toString());
       let searchResult = findSymbolPi(node, i, node.args[i]);
+      if (searchResult) {
+        return searchResult;
+      }
+    }
+  }
+  return null;
+}
+
+function findFunctionCosine(parent, arg, node) {
+  if (Node.Type.isFunction(node) && node.name === 'cos') {
+    return {
+      'find': node,
+      'index': arg,
+      'parent': parent,
+    };
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      //console.log('arg'+i, node.args[i].toString());
+      let searchResult = findFunctionCosine(node, i, node.args[i]);
       if (searchResult) {
         return searchResult;
       }
@@ -6327,7 +6364,7 @@ function findSymbolPi(parent, arg, node) {
 function step(node) {
   let nodeStatus;
 
-  console.log('step: node=', node.toString(), node);
+  //console.log('step: node=', node.toString(), node);
 
   node = flattenOperands(node);
   node = removeUnnecessaryParens(node, true);
@@ -6367,12 +6404,28 @@ function step(node) {
       //debugger;
       //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
       
-      console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
+      //console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
 
       //return Node.Status.nodeChanged(
       //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
       return Node.Status.nodeChanged(
         'SIMPLIFY_ARITHMETIC', node, newNode, false);
+    }
+  }
+
+  findResult = findFunctionCosine(null, null, node);
+  if (findResult) {
+    //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+    if (!findResult.parent) {
+      if (findResult.find.args && 
+        findResult.find.args.length == 1 &&
+        Node.Type.isConstant(findResult.find.args[0])) {
+        //debugger;
+        //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+        const newNode = Node.Creator.constant(Math.cos(node.args[0].value));
+        return Node.Status.nodeChanged(
+          'SIMPLIFY_ARITHMETIC', node, newNode, false);
+      }
     }
   }
   
@@ -7676,8 +7729,8 @@ function printNodeInfo(indent, label, node) {
 }
 
 function isConstantPower(node) {
-  console.log('isConstantPower', node);
-  printNodeInfo('', 'node', node);
+  //console.log('isConstantPower', node);
+  //printNodeInfo('', 'node', node);
   if (node.type === 'OperatorNode' &&
     node.op === '^' &&
     node.args &&
