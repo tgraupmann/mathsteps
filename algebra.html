@@ -33,6 +33,9 @@
             }
         }
 
+        testMathsteps(`6 * ln(-3.1 + 3) + 21`, `"DNE"`);
+        testMathsteps(`6 * ln(-3 + 3) + 21`, `-Infinity`);
+        testMathsteps(`ln(2)`, `0.6931471805599453`);
         testMathsteps(`(77^2 - 127 * 77 + 3850)/ (77 - 77)`, `"DNE"`);
         testMathsteps(`1 / (77 - 77)`, `"DNE"`);
         testMathsteps(`(sqrt{2 * 0 + 64} - 8) \over 0`, `"DNE"`);
@@ -83,7 +86,10 @@
 
         //TODO: FIX
         //WORKS:
-        const formula = `(77^2 - 127 * 77 + 3850)/ (77 - 77)`;
+        const formula = `6 * ln(-3.1 + 3) + 21`;
+        //const formula = `6 * ln(-3 + 3) + 21`;
+        //const formula = `ln(2)`;
+        //const formula = `(77^2 - 127 * 77 + 3850)/ (77 - 77)`;
         //const formula = `1 / (77 - 77)`;
         //const formula = `(sqrt{2 * 0 + 64} - 8) \over 0`;
         //const formula = `(sqrt{2 * 0 + 64} - 8) / 0`;
