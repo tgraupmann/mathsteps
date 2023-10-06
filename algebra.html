@@ -33,6 +33,14 @@
             }
         }
 
+        testMathsteps(`8 * sin(\pi+0.1) + 10`, `9.2013`);
+        testMathsteps(`8 * sin(\pi) + 10`, `10`);
+        testMathsteps(`sin(\pi)`, `1.2246467991473532e-16`);
+        testMathsteps(`sin(2 * \pi)`, `0.00001469282041289069`);
+        testMathsteps(`sin(3)`, `0.1411200080598672`);
+        testMathsteps(`sin(\pi + 1)`, `-0.8414749540675642`);
+        testMathsteps(`-0.00004 * 2003^2 + 0.62476 * 2003`, `1090.9139`);
+        testMathsteps(`-0.00004 * 2005^2 + 0.62476 * 2005`, `1091.8428`);
         testMathsteps(`10*\sqrt{25}+20`, `70`);
         testMathsteps(`10*\sqrt{x}+20`, null);
         testMathsteps(`\sqrt{100}`, `10`);
@@ -68,9 +76,16 @@
         const example1 = document.getElementById('example1');
 
         //TODO: FIX
-        //const formula = '10*x^0.5+20';
         //WORKS:
-        const formula = '10 * \sqrt{25} + 20';
+        const formula = '8 * sin(\pi+0.1) + 10';
+        //const formula = '8 * sin(\pi) + 10';
+        //const formula = `sin(\pi)`;
+        //const formula = `sin(2 * \pi)`;
+        //const formula = `sin(3)`;
+        //const formula = `sin(\pi + 1)`;
+        //const formula = `-0.00004 * 2003^2 + 0.62476 * 2003`;
+        //const formula = `-0.00004 * 2005^2 + 0.62476 * 2005`;
+        //const formula = '10 * \sqrt{25} + 20';
         //const formula = '10 * \sqrt(25) + 20';
         //const formula = '10*\sqrt(x)+20';
         //const formula = '\sqrt(100)';
