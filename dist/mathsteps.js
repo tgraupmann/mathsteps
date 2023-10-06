@@ -6305,7 +6305,7 @@ function stepThrough(node, debug=false) {
   const steps = [];
   
   const originalExpressionStr = print.ascii(node);
-  const MAX_STEP_COUNT = 20;
+  const MAX_STEP_COUNT = 1000;
   let iters = 0;
   
   // Now, step through the math expression until nothing changes
@@ -6405,18 +6405,27 @@ function findDivideByZero(node) {
   return null;
 }
 
-function findSymbolPi(parent, arg, node) {
+function findSymbolPi(parent, parentContent, arg, node) {
   if (Node.Type.isSymbol(node) && node.name === 'pi') {
     return {
       'find': node,
       'index': arg,
       'parent': parent,
+      'parentContent': parentContent,
     };
+  }
+  if (node.content) {
+    //printNodeInfo('', '***************findSymbolPi: node has content ', node);
+    //debugger;
+    let searchResult = findSymbolPi(null, node, null, node.content);
+    if (searchResult) {
+      return searchResult;
+    }
   }
   if (node.args) {
     for (let i = 0; i < node.args.length; i++) {
       //console.log('arg'+i, node.args[i].toString());
-      let searchResult = findSymbolPi(node, i, node.args[i]);
+      let searchResult = findSymbolPi(node, null, i, node.args[i]);
       if (searchResult) {
         return searchResult;
       }
@@ -6495,18 +6504,21 @@ function step(node) {
       'DIVISION_BY_ZERO', node, newNode, false);
   }
 
-  findResult = findSymbolPi(null, null, node);
+  findResult = findSymbolPi(null, null, null, node);
   if (findResult) {
     //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
     if (findResult.parent) {
       const newNode = node.cloneDeep();
-      findResult = findSymbolPi(null, null, newNode);
+      findResult = findSymbolPi(null, null, null, newNode);
       const altNode = Node.Creator.constant(Math.PI);
       findResult.parent.args[findResult.index] = altNode;
       //debugger;
       //console.log('args=', findResult.parent.args.toString(), 'index=', findResult.index, 'Replace=', findResult.parent.args[findResult.index].toString(), 'With=', altNode.toString());
       
       //console.log('****************** old node=', node.toString(), 'newNode=', newNode.toString());
+
+      //console.log('step: before=', node.toString());
+      //console.log('step: after=', newNode.toString());
 
       //return Node.Status.nodeChanged(
       //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
@@ -6669,7 +6681,7 @@ function step(node) {
         'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }
   }
-  
+
   for (let i = 0; i < simplificationTreeSearches.length; i++) {
     nodeStatus = simplificationTreeSearches[i](node);
     //console.log('simplificationTreeSearches[i]', simplificationTreeSearches[i](node).newNode.toString());
@@ -6686,6 +6698,8 @@ function step(node) {
       node = flattenOperands(node);
     }
   }
+
+  //debugger;
   return Node.Status.noChange(node);
 }
 
@@ -7053,7 +7067,7 @@ function stepThrough(leftNode, rightNode, comparator, debug=false) {
   let steps = [];
 
   const originalEquationStr = equation.ascii();
-  const MAX_STEP_COUNT = 20;
+  const MAX_STEP_COUNT = 1000;
   let iters = 0;
 
   // Remove unnecessary parentheses here, before doing the find roots check
