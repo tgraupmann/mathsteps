@@ -33,6 +33,8 @@
             }
         }
 
+        testMathsteps(`(sin(1.6708) - sqrt{sin(1.6708)^2 + 10 * cos(1.6708)^2}) / (19 * cos(1.6708)^2)`, `-0.2581`);
+        testMathsteps(`sqrt(cos(0)+3)`, `2`);
         testMathsteps(`6 * ln(-3.1 + 3) + 21`, `"DNE"`);
         testMathsteps(`6 * ln(-3 + 3) + 21`, `-Infinity`);
         testMathsteps(`ln(2)`, `0.6931471805599453`);
@@ -84,9 +86,15 @@
 
         const example1 = document.getElementById('example1');
 
+        // q: (sin(1.6708) + -sqrt(sin(1.6708) ^ 2 + 10 * cos(1.6708) ^ 2)) / (19 * cos(1.6708) ^ 2)
+
+        
+
         //TODO: FIX
         //WORKS:
-        const formula = `6 * ln(-3.1 + 3) + 21`;
+        const formula = `(sin(1.6708) - sqrt{sin(1.6708)^2 + 10 * cos(1.6708)^2}) / (19 * cos(1.6708)^2)`;
+        //const formula = `sqrt(cos(0)+3)`;
+        //const formula = `6 * ln(-3.1 + 3) + 21`;
         //const formula = `6 * ln(-3 + 3) + 21`;
         //const formula = `ln(2)`;
         //const formula = `(77^2 - 127 * 77 + 3850)/ (77 - 77)`;

@@ -6332,7 +6332,7 @@ function stepThrough(node, debug=false) {
 }
 
 function printInfo(indent, label, node) {
-  console.log(indent + label, 'type=', node.type, '=op', node.op, 'value=', node.value, 'name', node.name, 'args=', node.args ? node.args.length : 0, 'toString=', node.toString());
+  console.log(indent + label, 'type=', node.type, '=op', node.op, 'value=', node.value, 'name', node.name, 'args=', node.args ? node.args.length : 0, 'toString=', node.toString(), node);
 }
 
 function printNodeInfo(indent, label, node) {
@@ -6425,18 +6425,27 @@ function findSymbolPi(parent, arg, node) {
   return null;
 }
 
-function findFunctionNamed(name, parent, arg, node) {
+function findFunctionNamed(name, parent, parentContent, arg, node) {
+  //printNodeInfo('', 'findFunctionNamed: ', node);
   if (Node.Type.isFunction(node) && node.name === name) {
     return {
       'find': node,
       'index': arg,
       'parent': parent,
+      'parentContent': parentContent,
     };
+  }
+  if (node.content) {
+    //printNodeInfo('', '***************findFunctionNamed: node has content ', node);
+    let searchResult = findFunctionNamed(name, null, node, null, node.content);
+      if (searchResult) {
+        return searchResult;
+      }
   }
   if (node.args) {
     for (let i = 0; i < node.args.length; i++) {
       //console.log('arg'+i, node.args[i].toString());
-      let searchResult = findFunctionNamed(name, node, i, node.args[i]);
+      let searchResult = findFunctionNamed(name, node, null, i, node.args[i]);
       if (searchResult) {
         return searchResult;
       }
@@ -6507,28 +6516,17 @@ function step(node) {
   }
 
 
-  findResult = findFunctionNamed('cos', null, null, node);
+  findResult = findFunctionNamed('cos', null, null, null, node);
   if (findResult) {
     //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
-    if (!findResult.parent) {
-      if (findResult.find.args && 
-        findResult.find.args.length == 1 &&
-        Node.Type.isConstant(findResult.find.args[0])) {
-        //debugger;
-        //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
-        //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
-        const newNode = Node.Creator.constant(Math.cos(node.args[0].value));
-        return Node.Status.nodeChanged(
-          'SIMPLIFY_ARITHMETIC', node, newNode, false);
-      }
-    } else {
-      //console.log('***** Find Node:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+    if (findResult.parent) {
+      //console.log('***** Find Node with parent:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
       //debugger;
       if (Node.Type.isFunction(findResult.find) &&
         Node.Type.isConstant(findResult.find.args[0])) {
-        //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type);
+        //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type, findResult.find);
         const newNode = node.cloneDeep();
-        findResult = findFunctionNamed('cos', null, null, newNode);
+        findResult = findFunctionNamed('cos', null, null, null, newNode);
         const altNode = Node.Creator.constant(Math.cos(findResult.find.args[0].value));
         findResult.parent.args[findResult.index] = altNode;
         //debugger;
@@ -6541,31 +6539,29 @@ function step(node) {
         return Node.Status.nodeChanged(
           'SIMPLIFY_ARITHMETIC', node, newNode, false);
       }
+    } else if (findResult.find.args && 
+      findResult.find.args.length == 1 &&
+      Node.Type.isConstant(findResult.find.args[0])) {
+      //debugger;
+      //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+      //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
+      const newNode = Node.Creator.constant(Math.cos(node.args[0].value));
+      return Node.Status.nodeChanged(
+        'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }
   }
 
-  findResult = findFunctionNamed('sin', null, null, node);
+  findResult = findFunctionNamed('sin', null, null, null, node);
   if (findResult) {
     //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
-    if (!findResult.parent) {
-      if (findResult.find.args && 
-        findResult.find.args.length == 1 &&
-        Node.Type.isConstant(findResult.find.args[0])) {
-        //debugger;
-        //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
-        //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
-        const newNode = Node.Creator.constant(Math.sin(node.args[0].value));
-        return Node.Status.nodeChanged(
-          'SIMPLIFY_ARITHMETIC', node, newNode, false);
-      }
-    } else {
+    if (findResult.parent) {
       //console.log('***** Find Node:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
       //debugger;
       if (Node.Type.isFunction(findResult.find) &&
         Node.Type.isConstant(findResult.find.args[0])) {
         //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type);
         const newNode = node.cloneDeep();
-        findResult = findFunctionNamed('sin', null, null, newNode);
+        findResult = findFunctionNamed('sin', null, null, null, newNode);
         const altNode = Node.Creator.constant(Math.sin(findResult.find.args[0].value));
         findResult.parent.args[findResult.index] = altNode;
         //debugger;
@@ -6578,38 +6574,29 @@ function step(node) {
         return Node.Status.nodeChanged(
           'SIMPLIFY_ARITHMETIC', node, newNode, false);
       }
+    } else if (findResult.find.args && 
+      findResult.find.args.length == 1 &&
+      Node.Type.isConstant(findResult.find.args[0])) {
+      //debugger;
+      //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+      //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
+      const newNode = Node.Creator.constant(Math.sin(node.args[0].value));
+      return Node.Status.nodeChanged(
+        'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }
   }
 
-  findResult = findFunctionNamed('ln', null, null, node);
+  findResult = findFunctionNamed('ln', null, null, null, node);
   if (findResult) {
     //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
-    if (!findResult.parent) {
-      if (findResult.find.args && 
-        findResult.find.args.length == 1 &&
-        Node.Type.isConstant(findResult.find.args[0])) {
-        //debugger;
-        //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
-        //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
-        const val = Math.log(node.args[0].value);
-        if (Number.isNaN(val)) {
-          const newNode = Node.Creator.constant('DNE');
-          return Node.Status.nodeChanged(
-            'LOG_DNE', node, newNode, false);
-        } else {
-          const newNode = Node.Creator.constant(val);
-          return Node.Status.nodeChanged(
-            'SIMPLIFY_ARITHMETIC', node, newNode, false);
-        }
-      }
-    } else {
+    if (findResult.parent) {
       //console.log('***** Find Node:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
       //debugger;
       if (Node.Type.isFunction(findResult.find) &&
         Node.Type.isConstant(findResult.find.args[0])) {
         //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type);
         const newNode = node.cloneDeep();
-        findResult = findFunctionNamed('ln', null, null, newNode);
+        findResult = findFunctionNamed('ln', null, null, null, newNode);
         const val = Math.log(findResult.find.args[0].value);
         if (Number.isNaN(val)) {
           const newNode = Node.Creator.constant('DNE');
@@ -6629,31 +6616,36 @@ function step(node) {
             'SIMPLIFY_ARITHMETIC', node, newNode, false);
         }
       }
-    }
-  }
-
-  findResult = findFunctionNamed('sqrt', null, null, node);
-  if (findResult) {
-    //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
-    if (!findResult.parent) {
-      if (findResult.find.args && 
-        findResult.find.args.length == 1 &&
-        Node.Type.isConstant(findResult.find.args[0])) {
-        //debugger;
-        //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
-        //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
-        const newNode = Node.Creator.constant(Math.sqrt(node.args[0].value));
+    } else if (findResult.find.args && 
+      findResult.find.args.length == 1 &&
+      Node.Type.isConstant(findResult.find.args[0])) {
+      //debugger;
+      //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+      //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
+      const val = Math.log(node.args[0].value);
+      if (Number.isNaN(val)) {
+        const newNode = Node.Creator.constant('DNE');
+        return Node.Status.nodeChanged(
+          'LOG_DNE', node, newNode, false);
+      } else {
+        const newNode = Node.Creator.constant(val);
         return Node.Status.nodeChanged(
           'SIMPLIFY_ARITHMETIC', node, newNode, false);
       }
-    } else {
+    }
+  }
+
+  findResult = findFunctionNamed('sqrt', null, null, null, node);
+  if (findResult) {
+    //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+    if (findResult.parent) {
       //console.log('***** Find Node:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
       //debugger;
       if (Node.Type.isFunction(findResult.find) &&
         Node.Type.isConstant(findResult.find.args[0])) {
         //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type);
         const newNode = node.cloneDeep();
-        findResult = findFunctionNamed('sqrt', null, null, newNode);
+        findResult = findFunctionNamed('sqrt', null, null, null, newNode);
         const altNode = Node.Creator.constant(Math.sqrt(findResult.find.args[0].value));
         findResult.parent.args[findResult.index] = altNode;
         //debugger;
@@ -6666,6 +6658,15 @@ function step(node) {
         return Node.Status.nodeChanged(
           'SIMPLIFY_ARITHMETIC', node, newNode, false);
       }
+    } else if (findResult.find.args && 
+      findResult.find.args.length == 1 &&
+      Node.Type.isConstant(findResult.find.args[0])) {
+      //debugger;
+      //console.log('node.args[0].value', node.args[0].type, node.args[0].value);
+      //console.log('node.args[0].value', node.args[0].value, Math.cos(node.args[0].value));
+      const newNode = Node.Creator.constant(Math.sqrt(node.args[0].value));
+      return Node.Status.nodeChanged(
+        'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }
   }
   
