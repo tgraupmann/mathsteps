@@ -30,6 +30,8 @@ module.exports = {
 
   // e.g. 2/-1 -> -2
   DIVISION_BY_NEGATIVE_ONE: 'DIVISION_BY_NEGATIVE_ONE',
+  // e.g. 2/0 -> DNE
+  DIVISION_BY_ZERO: 'DIVISION_BY_ZERO',
   // e.g. 2/1 -> 2
   DIVISION_BY_ONE: 'DIVISION_BY_ONE',
   // e.g. x * 0 -> 0
@@ -6325,6 +6327,80 @@ function stepThrough(node, debug=false) {
   return steps;
 }
 
+function printInfo(indent, label, node) {
+  console.log(indent + label, 'type=', node.type, '=op', node.op, 'value=', node.value, 'name', node.name, 'args=', node.args ? node.args.length : 0, 'toString=', node.toString());
+}
+
+function printNodeInfo(indent, label, node) {
+  printInfo(indent, label, node)
+  if (node.content) {
+    printNodeInfo(indent + ' ', 'content', node.content)
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; ++i) {
+      printNodeInfo(indent + ' ', 'arg' + i, node.args[i]);    
+    }
+  }
+}
+
+function findDivideByZero(node) {
+  //printNodeInfo('', 'findDivideByZero: ', node);
+
+  // 1\0 parses into:
+  // node arg0: * operator
+  // node arg0: * operator: arg10 constant 0
+  // node arg0: * operator: arg1: symbol over
+  // node arg1: * operator: constant - 0
+  if (Node.Type.isOperator(node) && node.op === '*') {
+    if (node.args &&
+      node.args.length == 2 &&
+      node.args[0].args &&
+      node.args[0].args.length == 2 &&
+      Node.Type.isSymbol(node.args[0].args[1]) &&
+      node.args[0].args[1].name == "over" &&
+      Node.Type.isConstant(node.args[1]) &&
+      node.args[1].value == "0") {
+        //console.log('findDivideByZero', node.op, node.args.toString());
+        return node;
+    }
+  }
+
+  // (sqrt{2 * 0 + 64} - 8) over 0 oarses info:
+  // arg0: symbol over
+  // arg1: constant 0
+  if (node.args) {
+
+    //debugger;
+    for (let i = 0; (i + 1) < node.args.length; ++i) {
+      if (Node.Type.isSymbol(node.args[i]) &&
+        node.args[i].name == "over" &&
+        Node.Type.isConstant(node.args[i + 1]) &&
+        node.args[i + 1].value == "0") {
+          //console.log('findDivideByZero', node.op, node.args.toString());
+          return node;
+      }
+    }
+  }
+
+  // 1/0 detects as expected
+  if (Node.Type.isOperator(node) && node.op === '/') {
+    if (node.args && node.args.length == 2 && Node.Type.isConstant(node.args[1]) && node.args[1].value == "0") {
+      //console.log('findDivideByZero', node.op, node.args.toString());
+      return node;
+    }
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      //console.log('arg'+i, node.args[i].toString());
+      let searchResult = findDivideByZero(node.args[i]);
+      if (searchResult) {
+        return searchResult;
+      }
+    }
+  }
+  return null;
+}
+
 function findSymbolPi(parent, arg, node) {
   if (Node.Type.isSymbol(node) && node.name === 'pi') {
     return {
@@ -6418,8 +6494,15 @@ function step(node) {
     // e.g. abs(-4) => 4
     functionsSearch,
   ];
+  
+  let findResult = findDivideByZero(node);
+  if (findResult) {
+    const newNode = Node.Creator.constant('DNE');
+    return Node.Status.nodeChanged(
+      'DIVISION_BY_ZERO', node, newNode, false);
+  }
 
-  let findResult = findSymbolPi(null, null, node);
+  findResult = findSymbolPi(null, null, node);
   if (findResult) {
     //console.log('***** Find Node:', 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
     if (findResult.parent) {
@@ -6438,6 +6521,7 @@ function step(node) {
         'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }
   }
+
 
   findResult = findFunctionCosine(null, null, node);
   if (findResult) {

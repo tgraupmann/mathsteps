@@ -33,6 +33,10 @@
             }
         }
 
+        testMathsteps(`(sqrt{2 * 0 + 64} - 8) \over 0`, `"DNE"`);
+        testMathsteps(`(sqrt{2 * 0 + 64} - 8) / 0`, `"DNE"`);
+        testMathsteps(`1\over 0`, `"DNE"`);
+        testMathsteps(`1 / 0`, `"DNE"`);
         testMathsteps(`8 * sin(\pi+0.1) + 10`, `9.2013`);
         testMathsteps(`8 * sin(\pi) + 10`, `10`);
         testMathsteps(`sin(\pi)`, `1.2246467991473532e-16`);
@@ -77,7 +81,14 @@
 
         //TODO: FIX
         //WORKS:
-        const formula = '8 * sin(\pi+0.1) + 10';
+        const formula = `(sqrt{2 * 0 + 64} - 8) \over 0`;
+        //const formula = `(sqrt{2 * 0 + 64} - 8) / 0`;
+        //const formula = `1\over 0`;
+        //const formula = `1 / 0`;
+        //const formula = `(\sqrt{2 * 0.1 + 64} - 8) / 0.1`;
+        //const formula = `(\sqrt{2 * x + 64} - 8) \over x`;
+        //const formula = `(\sqrt{2 * 0.001 + 64} - 8) \over 0.001`;
+        //const formula = '8 * sin(\pi+0.1) + 10';
         //const formula = '8 * sin(\pi) + 10';
         //const formula = `sin(\pi)`;
         //const formula = `sin(2 * \pi)`;
