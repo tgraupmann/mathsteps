@@ -2581,7 +2581,7 @@ const SIMPLIFICATION_FUNCTIONS = [
   // multiplication by 0 yields 0
   reduceMultiplicationByZero,
   // division of 0 by something yields 0
-  reduceZeroDividedByAnything,
+  //reduceZeroDividedByAnything,
   // ____^0 --> 1
   reduceExponentByZero,
   // Check for x^1 which should be reduced to x
@@ -2715,6 +2715,8 @@ function reduceZeroDividedByAnything(node) {
   if (node.op !== '/') {
     return Node.Status.noChange(node);
   }
+  //debugger;
+  //console.log('reduceZeroDividedByAnything:', 'op=', node.op, node.toString());
   if (node.args[0].value === '0') {
     const newNode = Node.Creator.constant(0);
     return Node.Status.nodeChanged(
