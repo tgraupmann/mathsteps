@@ -6577,6 +6577,8 @@ function step(node) {
         const a = parseFloat(findResult.find.args[0].value);
         const b = parseFloat(findResult.find.args[1].value);
         const result = a / b;
+        //console.log('a=', a);
+        //console.log('b=', b);
         //console.log('result=', result);
         const altNode = Node.Creator.constant(result);
         findResult.parent.args[findResult.index] = altNode;
@@ -6591,9 +6593,11 @@ function step(node) {
       findResult.find.args.length == 2 &&
       Node.Type.isConstant(findResult.find.args[0]) &&
       Node.Type.isConstant(findResult.find.args[1])) {
-      const a = parseFloat(node.args[0].value);
-      const b = parseFloat(node.args[1].value);
+      const a = parseFloat(findResult.find.args[0].value);
+      const b = parseFloat(findResult.find.args[1].value);
       const result = a / b;
+      //console.log('a=', a);
+      //console.log('b=', b);
       //console.log('result=', result);
       //debugger;
       const newNode = Node.Creator.constant(result);
