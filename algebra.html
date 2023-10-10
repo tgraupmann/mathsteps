@@ -3,10 +3,91 @@
 <head>
     <title>Algebra Examples for Mathsteps</title>
     <script src="dist/mathsteps.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="dist/vue.js"></script>
+    <script src="dist/components.js"></script>
 </head>
 
 <body>
-    <div id="example1"></div>
+    <div id="root">
+        <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
+            <div>A) Show an inline expression</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-parse expression="sin(x)^2 = 1 - cos(x)^2"></vue-mathsteps-parse>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
+            <div>B) Simplify an expression</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-parse expression="(a + 2)(a - 2)"></vue-mathsteps-parse>
+            </div>
+            <div>Result:</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-simplify expression="(a + 2)(a - 2)"></vue-mathsteps-simplify>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
+            <div>C) Display expression substition, x=5</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-parse-substition expression="x^2 + 4*x - 20" letter="x" value="5"></vue-mathsteps-parse-substition>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
+            <div>D) Simplify expression substition, x=5</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-parse-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x" value="5"></vue-mathsteps-parse-substition>
+            </div>
+            <div>Result:</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-simplify-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x" value="5"></vue-mathsteps-simplify-substition>
+            </div>
+        </div>
+        
+        
+        <table border="1">
+            <tr align="center" style="background: #ffc">
+                <td>Original Formula:</td>
+                <td colspan="3"><vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse></td>
+            </tr>    
+
+            <tr align="center">
+                <td colspan="4">Steps: {{ steps.length }}</td>
+            </tr>
+            
+            <tr>
+                <td>Before Change</td>
+                <td>Change</td>
+                <td>After Change</td>
+                <td># of Substeps</td>
+            </tr>   
+   
+            
+            <tr v-for="step in steps">
+                <td><vue-mathsteps-parse :expression="step.oldNode.toTex()"></vue-mathsteps-parse></td>
+                <td>{{ step.changeType }}</td>
+                <td><vue-mathsteps-parse :expression="step.newNode.toTex()"></vue-mathsteps-parse></td>
+                <td>{{ step.substeps.length }}</td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        var vue = new Vue({
+            el: "#root",
+            data: {
+                mathsteps: mathsteps,
+                formula: `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`,
+                steps: [],
+            },
+            methods: {
+            },
+            created() {
+                this.steps = mathsteps.simplifyExpression(this.formula);
+            },
+        });
+    </script>
 </body>
 
 <script>
@@ -82,110 +163,6 @@
         testMathsteps(`2 * a * b + 3 * a * b`, `5a * b`);
         testMathsteps(`2 * a * b + 3 * b * a`, `5a * b`);
     }
-
-    function doExample1() {
-
-        const example1 = document.getElementById('example1');
-
-        // q: (sin(1.6708) + -sqrt(sin(1.6708) ^ 2 + 10 * cos(1.6708) ^ 2)) / (19 * cos(1.6708) ^ 2)
-
-        
-
-        //TODO: FIX
-        //WORKS:
-        const formula = `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`;
-        //const formula = `(sin(1.6708) - sqrt{sin(1.6708)^2 + 10 * cos(1.6708)^2}) / (19 * cos(1.6708)^2)`;
-        //const formula = `sqrt(cos(0)+3)`;
-        //const formula = `6 * ln(-3.1 + 3) + 21`;
-        //const formula = `6 * ln(-3 + 3) + 21`;
-        //const formula = `ln(2)`;
-        //const formula = `(77^2 - 127 * 77 + 3850)/ (77 - 77)`;
-        //const formula = `1 / (77 - 77)`;
-        //const formula = `(sqrt{2 * 0 + 64} - 8) \over 0`;
-        //const formula = `(sqrt{2 * 0 + 64} - 8) / 0`;
-        //const formula = `1\over 0`;
-        //const formula = `1 / 0`;
-        //const formula = `(\sqrt{2 * 0.1 + 64} - 8) / 0.1`;
-        //const formula = `(\sqrt{2 * x + 64} - 8) \over x`;
-        //const formula = `(\sqrt{2 * 0.001 + 64} - 8) \over 0.001`;
-        //const formula = '8 * sin(\pi+0.1) + 10';
-        //const formula = '8 * sin(\pi) + 10';
-        //const formula = `sin(\pi)`;
-        //const formula = `sin(2 * \pi)`;
-        //const formula = `sin(3)`;
-        //const formula = `sin(\pi + 1)`;
-        //const formula = `-0.00004 * 2003^2 + 0.62476 * 2003`;
-        //const formula = `-0.00004 * 2005^2 + 0.62476 * 2005`;
-        //const formula = '10 * \sqrt{25} + 20';
-        //const formula = '10 * \sqrt(25) + 20';
-        //const formula = '10*\sqrt(x)+20';
-        //const formula = '\sqrt(100)';
-        //const formula = '10 * 100^0.5 + 20';
-        //const formula = '10 * 25^0.5 + 20';
-        //const formula = '25 - 4 * 2 + 3';
-        //const formula = '8 * cos(\pi+0.1) + 10';
-        //const formula = '8 * cos(\pi) + 10'; // should be 2
-        //const formula = `cos(\pi)`;
-        //const formula = `cos(2 * \pi)`;
-        //const formula = `cos(3)`;
-        //const formula = `cos(\pi + 1)`;
-        //const formula = `(((x^4)^0.25)^2)^0.5`; // should result as 2
-        //const formula = `(x^2)^0.5`; // should result as 2
-        //const formula = `(x^0.5)^2`; // should result as 2
-        //const formula = `(a + 2)*(a + 3)`; // should result as a ^ 2 + 5 * a + 6
-        //const formula = `2 * a * b^2 + 3 * b^2 * a`; // should result as 5 * a * b ^ 2
-        //const formula = `2 * a^2 * b + 3 * b * a^2`; // should result as 5 * a ^ 2 * b
-        //const formula = `(a + 2)*(b - 3)`; // should result as a * b - 3 * a + 2 * b - 6
-        //const formula = `3(a + h)^2 + 2(a + h) - 1`; // should result to 3 * a ^ 2 + 6 * a * h + 3 * h ^ 2 + 2 * a + 2 * h - 1
-        //const formula = '3 * a ^ 2 + 3 * a * h + 3 * a * h + 3 * h ^ 2 + 2 * a + 2 * h - 1'; // should result to 3 * a ^ 2 + 6 * a * h + 3 * h ^ 2 + 2 * a + 2 * h - 1
-        //const formula = '3 * a ^ 2 + 3 * a * h + 3 * h * a + 3 * h ^ 2 + 2 * a + 2 * h - 1'; // should result to 3 * a ^ 2 + 6 * a * h + 3 * h ^ 2 + 2 * a + 2 * h - 1
-        //const formula = '2 * a * b + 4 * a * b'; // should result to 6 * a * b
-        //const formula = '2*b*a + 4*a*b'; // should result to 6 * a * b
-        //const formula = `2*a + 3*a`; // should result as 5 * a
-        //const formula = `2 * a * b + 3 * a * b`; // should result as 5 * a * b
-        //const formula = `2 * a * b + 3 * b * a`; // should result as 5 * a * b
-
-        //console.log('formula', formula);
-
-        let content = `<table border="1">`;
-
-        content += `<tr align="center"><td colspan="5">`
-        content += formula;
-        content += `</td></tr>`;
-
-        
-        content += `<tr>
-                        <td>Before Change</td>
-                        <td>Change</td>
-                        <td>After Change</td>
-                        <td>Latex</td>
-                        <td># of Substeps</td>
-                    </tr>`;
-
-        //debugger;
-        const steps = mathsteps.simplifyExpression(formula);
-
-        //console.log(steps);
-
-        content += `<tr align="center"><td colspan="5">`
-        content += 'Steps: ' + steps.length;
-        content += `</td></tr>`;
-
-        steps.forEach(step => {
-            content += `<tr>`;
-            content += `<td>` + step.oldNode.toString() + `</td>`;
-            content += `<td>` + step.changeType + `</td>`;
-            content += `<td>` + mathsteps.printNode.ascii(step.newNode) + `</td>`;
-            content += `<td>` + step.newNode.toTex() + `</td>`;
-            content += `<td>` + step.substeps.length + `</td>`;
-        });
-
-        content += `</table>`;
-
-        example1.innerHTML = content;
-    }
-
-    doExample1();
 
     doUnitTests();
 
