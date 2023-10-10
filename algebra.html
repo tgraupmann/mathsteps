@@ -67,24 +67,27 @@
             <tr align="center" style="background: #ffc">
                 <td>Original Formula:</td>
                 <td colspan="3"><vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse></td>
+                <td><vue-mathsteps-fraction :decimal="formula"></vue-mathsteps-fraction></td>
             </tr>
 
             <tr align="center">
-                <td colspan="4">Steps: {{ steps.length }}</td>
+                <td colspan="5">Steps: {{ steps.length }}</td>
             </tr>
 
             <tr>
                 <td>Before Change</td>
                 <td>Change</td>
                 <td>After Change</td>
+                <td>Fraction</td>
                 <td># of Substeps</td>
             </tr>
 
 
             <tr v-for="step in steps">
-                <td><vue-mathsteps-parse :expression="step.oldNode.toTex()"></vue-mathsteps-parse></td>
+                <td><vue-mathsteps-parse :expression="step.oldNode.toString()"></vue-mathsteps-parse></td>
                 <td>{{ step.changeType }}</td>
-                <td><vue-mathsteps-parse :expression="step.newNode.toTex()"></vue-mathsteps-parse></td>
+                <td><vue-mathsteps-parse :expression="step.newNode.toString()"></vue-mathsteps-parse></td>
+                <td><vue-mathsteps-fraction :decimal="step.newNode.toString()"></vue-mathsteps-fraction></td>
                 <td>{{ step.substeps.length }}</td>
             </tr>
         </table>
@@ -96,8 +99,9 @@
                 data: {
                     mathsteps: mathsteps,
                     //TODO:
-                    formula: `((7 - (7 - 0.1)) / (7 * (7 - 0.1))) / ((7 - 0.1) - 7)`,
                     //WORKS:
+                    formula: `((7 - (7 - 0.1)) / (7 * (7 - 0.1))) / ((7 - 0.1) - 7)`,
+                    //formula: `0.125`,
                     //formula: `(sqrt{10 + 14 * (-3 / 2 - 0.001)^2}) / (3 + 2 * (-3 / 2 - 0.001))`,
                     //formula: `sqrt{3 / 2}`,
                     //formula: `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`,
