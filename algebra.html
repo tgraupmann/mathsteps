@@ -36,7 +36,11 @@
         </div>
 
         <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
-            <div>D) Simplify expression substition, x=5</div>
+            <div>D) Simplify expression with substition</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-parse expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))"></vue-mathsteps-parse>
+            </div>
+            where x = 5
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
                 <vue-mathsteps-parse-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x" value="5"></vue-mathsteps-parse-substition>
             </div>
