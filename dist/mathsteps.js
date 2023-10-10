@@ -6465,6 +6465,40 @@ function findFunctionNamed(name, parent, parentContent, arg, node) {
   return null;
 }
 
+function findOperatorNamed(fn, parent, parentContent, arg, node) {
+  if (Node.Type.isOperator(node) && node.fn === fn) {
+    //printNodeInfo('', 'findOperatorNamed: ', node);
+    if (node.args &&
+      node.args.length == 2 &&
+      Node.Type.isConstant(node.args[0]) &&
+      Node.Type.isConstant(node.args[1])) {
+        return {
+          'find': node,
+          'index': arg,
+          'parent': parent,
+          'parentContent': parentContent,
+        };
+    }
+  }
+  if (node.content) {
+    //printNodeInfo('', '***************findOperatorNamed: node has content ', node);
+    let searchResult = findOperatorNamed(fn, null, node, null, node.content);
+      if (searchResult) {
+        return searchResult;
+      }
+  }
+  if (node.args) {
+    for (let i = 0; i < node.args.length; i++) {
+      //console.log('arg'+i, node.args[i].toString());
+      let searchResult = findOperatorNamed(fn, node, null, i, node.args[i]);
+      if (searchResult) {
+        return searchResult;
+      }
+    }
+  }
+  return null;
+}
+
 // Given a mathjs expression node, performs a single step to simplify the
 // expression. Returns a Node.Status object.
 function step(node) {
@@ -6524,6 +6558,45 @@ function step(node) {
 
       //return Node.Status.nodeChanged(
       //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+      return Node.Status.nodeChanged(
+        'SIMPLIFY_ARITHMETIC', node, newNode, false);
+    }
+  }
+
+  findResult = findOperatorNamed('divide', null, null, null, node);
+  if (findResult) {
+    if (findResult.parent) {
+      //console.log('***** Find Node with parent:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
+      //debugger;
+      if (Node.Type.isOperator(findResult.find) &&
+        Node.Type.isConstant(findResult.find.args[0]) &&
+        Node.Type.isConstant(findResult.find.args[1])) {
+        //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type, findResult.find);
+        const newNode = node.cloneDeep();
+        findResult = findOperatorNamed('divide', null, null, null, newNode);
+        const a = parseFloat(findResult.find.args[0].value);
+        const b = parseFloat(findResult.find.args[1].value);
+        const result = a / b;
+        //console.log('result=', result);
+        const altNode = Node.Creator.constant(result);
+        findResult.parent.args[findResult.index] = altNode;
+        //debugger;
+
+        //return Node.Status.nodeChanged(
+        //  ChangeTypes.SIMPLIFY_ARITHMETIC, node, newNode, false);
+        return Node.Status.nodeChanged(
+          'SIMPLIFY_ARITHMETIC', node, newNode, false);
+      }
+    } else if (findResult.find.args && 
+      findResult.find.args.length == 2 &&
+      Node.Type.isConstant(findResult.find.args[0]) &&
+      Node.Type.isConstant(findResult.find.args[1])) {
+      const a = parseFloat(node.args[0].value);
+      const b = parseFloat(node.args[1].value);
+      const result = a / b;
+      //console.log('result=', result);
+      //debugger;
+      const newNode = Node.Creator.constant(result);
       return Node.Status.nodeChanged(
         'SIMPLIFY_ARITHMETIC', node, newNode, false);
     }

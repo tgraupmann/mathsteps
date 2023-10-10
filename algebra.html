@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div id="root">
+    <div id="example1">
         <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
             <div>A) Show an inline expression</div>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -31,7 +31,8 @@
         <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
             <div>C) Display expression substition, x=5</div>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <vue-mathsteps-parse-substition expression="x^2 + 4*x - 20" letter="x" value="5"></vue-mathsteps-parse-substition>
+                <vue-mathsteps-parse-substition expression="x^2 + 4*x - 20" letter="x"
+                    value="5"></vue-mathsteps-parse-substition>
             </div>
         </div>
 
@@ -42,33 +43,44 @@
             </div>
             where x = 5
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <vue-mathsteps-parse-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x" value="5"></vue-mathsteps-parse-substition>
+                <vue-mathsteps-parse-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x"
+                    value="5"></vue-mathsteps-parse-substition>
             </div>
             <div>Result:</div>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <vue-mathsteps-simplify-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x" value="5"></vue-mathsteps-simplify-substition>
+                <vue-mathsteps-simplify-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x"
+                    value="5"></vue-mathsteps-simplify-substition>
             </div>
         </div>
-        
-        
+    </div>
+
+    <script>
+        function setupExample1() {
+            const vue = new Vue({
+                el: "#example1",
+            });
+        }
+    </script>
+
+    <div id="example2">
         <table border="1">
             <tr align="center" style="background: #ffc">
                 <td>Original Formula:</td>
                 <td colspan="3"><vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse></td>
-            </tr>    
+            </tr>
 
             <tr align="center">
                 <td colspan="4">Steps: {{ steps.length }}</td>
             </tr>
-            
+
             <tr>
                 <td>Before Change</td>
                 <td>Change</td>
                 <td>After Change</td>
                 <td># of Substeps</td>
-            </tr>   
-   
-            
+            </tr>
+
+
             <tr v-for="step in steps">
                 <td><vue-mathsteps-parse :expression="step.oldNode.toTex()"></vue-mathsteps-parse></td>
                 <td>{{ step.changeType }}</td>
@@ -78,19 +90,25 @@
         </table>
     </div>
     <script>
-        var vue = new Vue({
-            el: "#root",
-            data: {
-                mathsteps: mathsteps,
-                formula: `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`,
-                steps: [],
-            },
-            methods: {
-            },
-            created() {
-                this.steps = mathsteps.simplifyExpression(this.formula);
-            },
-        });
+        function setupExample2() {
+            const vue = new Vue({
+                el: "#example2",
+                data: {
+                    mathsteps: mathsteps,
+                    //TODO:
+                    //WORKS:
+                    formula: `(sqrt{10 + 14 * (-3 / 2 - 0.001)^2}) / (3 + 2 * (-3 / 2 - 0.001))`,
+                    //formula: `sqrt{3 / 2}`,
+                    //formula: `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`,
+                    steps: [],
+                },
+                methods: {
+                },
+                created() {
+                    this.steps = mathsteps.simplifyExpression(this.formula);
+                },
+            });
+        }
     </script>
 </body>
 
@@ -118,8 +136,11 @@
             }
         }
 
-        testMathsteps(`(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`, `-0.02632`);
-        testMathsteps(`(sin(1.6708) - sqrt{sin(1.6708)^2 + 10 * cos(1.6708)^2}) / (19 * cos(1.6708)^2)`, `-0.2581`);
+        testMathsteps(`(sqrt{10 + 14 * (-3 / 2 - 0.001)^2}) / (3 + 2 * (-3 / 2 - 0.001))`, `-3222.6541856053996`);
+        testMathsteps(`sqrt{3 / 2}`, `1.224744871391589`);
+        testMathsteps(`(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`, `0`);
+        testMathsteps(`(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`, `0`);
+        testMathsteps(`(sin(1.6708) - sqrt{sin(1.6708)^2 + 10 * cos(1.6708)^2}) / (19 * cos(1.6708)^2)`, `-0.258078141499472`);
         testMathsteps(`sqrt(cos(0)+3)`, `2`);
         testMathsteps(`6 * ln(-3.1 + 3) + 21`, `"DNE"`);
         testMathsteps(`6 * ln(-3 + 3) + 21`, `-Infinity`);
@@ -169,6 +190,8 @@
     }
 
     doUnitTests();
+    setupExample1();
+    setupExample2();
 
 </script>
 
