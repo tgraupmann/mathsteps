@@ -124,32 +124,34 @@ Vue.component("vue-mathsteps-fraction", {
     },
 
     convertToFraction(decimal) {
-      //console.log('convertToFraction: decimal=', decimal, 'Number=', asNumber, Number.isNaN(asNumber));
       let asNumber = Number(decimal);
+      //console.log('convertToFraction: decimal=', decimal, 'Number=', asNumber, Number.isNaN(asNumber));
       if (Number.isNaN(asNumber)) {
         return decimal;
       }
       let isNegative = asNumber < 0;
       asNumber = Math.abs(asNumber);
-      let index = decimal.toString().indexOf('.');
+      let index = asNumber.toString().indexOf('.');
       if (index < 0) {
         return decimal;
       }
-      let whole = asNumber.toString().substring(0, index - 1);
+      let whole = asNumber.toString().substring(0, index);
       let fraction = asNumber.toString().substring(index + 1);
+      //console.log('whole=', whole, 'fraction=', fraction);
       const MAX_DENOM_LENGTH = 6;
       if (fraction.length > MAX_DENOM_LENGTH) {
         fraction = fraction.substring(0, MAX_DENOM_LENGTH);
       }
+      //console.log('whole=', whole, 'fraction=', fraction);
       let denominator = Math.pow(10, fraction.length);
       let numerator = Number(fraction);
       //console.log('asNumber', asNumber, 'whole=', whole, 'fraction=', fraction, 'numerator', numerator, 'denominator=', denominator);
       //console.log('factors numerator=', this.getFactors(numerator));
       //console.log('factors denominator=', this.getFactors(denominator));
       let reduction = this.reduceFactors(this.getFactors(numerator), this.getFactors(denominator));
-      //console.log('reduction=', reduction);
-      //console.log('factors numerator=', reduction.numerator);
-      //console.log('factors denominator=', reduction.denominator);
+      //console.log('reduction=', JSON.stringify(reduction, null, 2));
+      //console.log('factors numerator=', JSON.stringify(reduction.numerator, null, 2));
+      //console.log('factors denominator=', JSON.stringify(reduction.denominator, null, 2));
       let factors = this.combineFactors(reduction);
       //console.log('factors=', factors);
       let result = '';
