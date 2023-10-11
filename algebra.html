@@ -73,7 +73,7 @@
                             for (let i = 0; i < children.length; ++i) {
                                 let child = children[i];
                                 child.$forceUpdate();
-                                refreshEverything(child.$children);
+                                this.refreshEverything(child.$children);
                             }
                         }
                     },
