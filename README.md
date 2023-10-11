@@ -4,7 +4,7 @@
 
 ## Fork
 
-* This repository has been forked from Google's mathsteps project and extended with capabilities to support simplification, sorting polynomials, fraction operations, and sin/cos/abs/sqrt/pi symbols. [dist/mathsteps.js](dist/mathsteps.js) has been exported through browserify to make the library available in the browser. Parsing and simplification has been added through [dist/vue.js](dist/vue.js) - Vue2 [dist/components.js](dist/components.js). Check out the [Web Demo](https://tgraupmann.github.io/mathsteps/algebra.html)[algebra.html].
+* This repository has been forked from Google's mathsteps project and extended with capabilities to support simplification, sorting polynomials, fraction operations, and sin/cos/abs/sqrt/pi symbols. [dist/mathsteps.js](dist/mathsteps.js) has been exported through browserify to make the library available in the browser. Parsing and simplification has been added through [dist/vue.js](dist/vue.js) - Vue2 [dist/components.js](dist/components.js). Check out the [Web Demo](https://tgraupmann.github.io/mathsteps/algebra.html).
 
 ## Requirements
 
