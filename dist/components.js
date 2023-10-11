@@ -28,7 +28,7 @@ Vue.component("vue-mathsteps-parse-substition", {
 });
 
 Vue.component("vue-mathsteps-simplify", {
-  props: ["expression"],
+  props: ["expression", "fraction"],
   methods: {
     simplify(expression) {
       const steps = mathsteps.simplifyExpression(expression);
@@ -39,19 +39,22 @@ Vue.component("vue-mathsteps-simplify", {
     },
   },
   template: `
-  <vue-mathsteps-parse :expression="simplify(expression)"></vue-mathsteps-parse>
+  <div>
+    <vue-mathsteps-fraction v-if="fraction" :decimal="simplify(expression)"></vue-mathsteps-fraction>
+    <vue-mathsteps-parse v-else :expression="simplify(expression)"></vue-mathsteps-parse>
+  </div>
   `,
 });
 
 Vue.component("vue-mathsteps-simplify-substition", {
-  props: ["expression", "letter", "value"],
+  props: ["expression", "letter", "value", "fraction"],
   methods: {
     substitute(expression) {
       return expression.replaceAll(this.letter, '(' + this.value + ')');
     },
   },
   template: `
-  <vue-mathsteps-simplify :expression="substitute(expression)"></vue-mathsteps-simplify>
+  <vue-mathsteps-simplify :expression="substitute(expression)" :fraction="fraction"></vue-mathsteps-simplify>
   `,
 });
 

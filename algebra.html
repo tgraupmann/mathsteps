@@ -39,17 +39,22 @@
         <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
             <div>D) Simplify expression with substition</div>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <vue-mathsteps-parse expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))"></vue-mathsteps-parse>
+                <vue-mathsteps-parse expression="sqrt{20 + x} / (10 * x)"></vue-mathsteps-parse>
             </div>
             where x = 5
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <vue-mathsteps-parse-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x"
+                <vue-mathsteps-parse-substition expression="sqrt{20 + x} / (10 * x)" letter="x"
                     value="5"></vue-mathsteps-parse-substition>
             </div>
             <div>Result:</div>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <vue-mathsteps-simplify-substition expression="(x^2 + 4*x - sqrt{20 + x}) / (7 * cos(0))" letter="x"
+                <vue-mathsteps-simplify-substition expression="sqrt{20 + x} / (10 * x)" letter="x"
                     value="5"></vue-mathsteps-simplify-substition>
+            </div>
+            <div>Result as fraction:</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <vue-mathsteps-simplify-substition expression="sqrt{20 + x} / (10 * x)" letter="x" value="5"
+                    fraction="true"></vue-mathsteps-simplify-substition>
             </div>
         </div>
     </div>
@@ -63,34 +68,35 @@
     </script>
 
     <div id="example2">
-        <table border="1">
-            <tr align="center" style="background: #ffc">
-                <td>Original Formula:</td>
-                <td colspan="3"><vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse></td>
-                <td><vue-mathsteps-fraction :decimal="formula"></vue-mathsteps-fraction></td>
-            </tr>
-
-            <tr align="center">
-                <td colspan="5">Steps: {{ steps.length }}</td>
-            </tr>
-
-            <tr>
-                <td>Before Change</td>
-                <td>Change</td>
-                <td>After Change</td>
-                <td>Fraction</td>
-                <td># of Substeps</td>
-            </tr>
-
-
-            <tr v-for="step in steps">
-                <td><vue-mathsteps-parse :expression="step.oldNode.toString()"></vue-mathsteps-parse></td>
-                <td>{{ step.changeType }}</td>
-                <td><vue-mathsteps-parse :expression="step.newNode.toString()"></vue-mathsteps-parse></td>
-                <td><vue-mathsteps-fraction :decimal="step.newNode.toString()"></vue-mathsteps-fraction></td>
-                <td>{{ step.substeps.length }}</td>
-            </tr>
-        </table>
+        <div style="display: flex; flex-direction: column; width: 100%">
+            <div style="display: flex; flex-direction: row; justify-content: space-evenly; border-top: solid 1px black">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffc">
+                    <div>Steps</div>
+                    <div>{{ steps.length }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #ffc;">
+                    <div>Original Formula</div>
+                    <vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #cff">
+                    <div>As Fraction</div>
+                    <vue-mathsteps-fraction :decimal="formula"></vue-mathsteps-fraction>
+                </div>
+            </div>
+            <div v-for="(step, index) in steps" style="display: flex; flex-direction: row; justify-content: space-evenly; border-top: solid 1px black">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div>Change {{ index + 1 }}: {{ step.changeType }}</div>
+                    <div>Substeps: {{ step.substeps.length }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #ffc;">
+                    <vue-mathsteps-parse :expression="step.newNode.toString()"></vue-mathsteps-parse>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #cff">
+                    <div>(As Fraction)</div>
+                    <vue-mathsteps-fraction :decimal="step.newNode.toString()"></vue-mathsteps-fraction>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
         function setupExample2() {
