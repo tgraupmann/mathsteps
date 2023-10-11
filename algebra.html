@@ -9,7 +9,120 @@
 </head>
 
 <body>
-    <div id="example1">
+    <div id="example1" style="background: #ddd; border: solid 1px black; padding: 20px" @input="refresh">
+        <h1>Example 1</h1>
+        <center>
+            <textarea cols="120" rows="5" v-model="formula"
+                :style="((hasError) ? 'background: red; color: white' : 'color: black')"></textarea>
+        </center>
+        <div v-if="!hasError" style="display: flex; flex-direction: column; width: 100%">
+            <div style="display: flex; flex-direction: row; justify-content: space-evenly; border-top: solid 1px black">
+                <div
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffc">
+                    <div>Steps</div>
+                    <div>{{ steps.length }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #ffc;">
+                    <div>Original Formula</div>
+                    <vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #cff">
+                    <div>As Fraction</div>
+                    <vue-mathsteps-fraction :decimal="formula"></vue-mathsteps-fraction>
+                </div>
+            </div>
+            <div v-for="(step, index) in steps"
+                style="display: flex; flex-direction: row; justify-content: space-evenly; border-top: solid 1px black">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div>Change {{ index + 1 }}: {{ step.changeType }}</div>
+                    <div>Substeps: {{ step.substeps.length }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #ffc;">
+                    <vue-mathsteps-parse :expression="step.newNode.toString()"></vue-mathsteps-parse>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; background: #cff">
+                    <div>(As Fraction)</div>
+                    <vue-mathsteps-fraction :decimal="step.newNode.toString()"></vue-mathsteps-fraction>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function setupExample2() {
+            const vue = new Vue({
+                el: "#example1",
+                data: {
+                    mathsteps: mathsteps,
+                    //TODO:
+                    //WORKS:
+                    //formula: `0.125`,
+                    //formula: `-1/4`,
+                    //formula: `-1/2`,
+                    //formula: `-0.5`,
+                    //formula: `0.5`,
+                    //formula: `sqrt{3 / 2}`,
+                    //formula: `((7 - (7 - 0.1)) / (7 * (7 - 0.1))) / ((7 - 0.1) - 7)`,
+                    //formula: `(sqrt{10 + 14 * (-3 / 2 - 0.001)^2}) / (3 + 2 * (-3 / 2 - 0.001))`,
+                    formula: `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`,
+                    steps: [],
+                    hasError: false,
+                },
+                methods: {
+                    refreshEverything(children) {
+                        if (children) {
+                            for (let i = 0; i < children.length; ++i) {
+                                let child = children[i];
+                                child.$forceUpdate();
+                                refreshEverything(child.$children);
+                            }
+                        }
+                    },
+                    updateUI() {
+                        var refThis = this;
+                        setTimeout(function () {
+                            try {
+                                mathsteps.math.parse(refThis.formula);
+                            } catch {
+                                refThis.hasError = true;
+                                return;
+                            }
+
+                            refThis.steps = refThis.mathsteps.simplifyExpression(refThis.formula);
+                            refThis.hasError = false;
+
+                            let children = refThis.$children;
+                            refThis.refreshEverything(children);
+
+                            refThis.$forceUpdate();
+
+                            setTimeout(function () {
+                                // refreh Latex
+                                MathJax.typeset();
+                            }, 100);
+
+                        }, 0);
+                    },
+                    refresh() {
+                        this.steps = []
+                        this.hasError = true;
+                        this.updateUI();
+                    },
+                },
+                created() {
+                    this.steps = []
+                    this.hasError = false;
+                },
+                mounted() {
+                    this.updateUI()
+                },
+            });
+            return vue;
+        }
+    </script>
+
+
+    <div id="example2">
+        <h1>Example 2</h1>
         <div style="display: flex; flex-direction: column; margin: 10px; padding: 20px; background: #eee">
             <div>A) Show an inline expression</div>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -62,69 +175,12 @@
     <script>
         function setupExample1() {
             const vue = new Vue({
-                el: "#example1",
+                el: "#example2",
             });
+            return vue;
         }
     </script>
 
-    <div id="example2">
-        <div style="display: flex; flex-direction: column; width: 100%">
-            <div style="display: flex; flex-direction: row; justify-content: space-evenly; border-top: solid 1px black">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffc">
-                    <div>Steps</div>
-                    <div>{{ steps.length }}</div>
-                </div>
-                <div style="display: flex; flex-direction: column; align-items: center; background: #ffc;">
-                    <div>Original Formula</div>
-                    <vue-mathsteps-parse :expression="formula"></vue-mathsteps-parse>
-                </div>
-                <div style="display: flex; flex-direction: column; align-items: center; background: #cff">
-                    <div>As Fraction</div>
-                    <vue-mathsteps-fraction :decimal="formula"></vue-mathsteps-fraction>
-                </div>
-            </div>
-            <div v-for="(step, index) in steps" style="display: flex; flex-direction: row; justify-content: space-evenly; border-top: solid 1px black">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <div>Change {{ index + 1 }}: {{ step.changeType }}</div>
-                    <div>Substeps: {{ step.substeps.length }}</div>
-                </div>
-                <div style="display: flex; flex-direction: column; align-items: center; background: #ffc;">
-                    <vue-mathsteps-parse :expression="step.newNode.toString()"></vue-mathsteps-parse>
-                </div>
-                <div style="display: flex; flex-direction: column; align-items: center; background: #cff">
-                    <div>(As Fraction)</div>
-                    <vue-mathsteps-fraction :decimal="step.newNode.toString()"></vue-mathsteps-fraction>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        function setupExample2() {
-            const vue = new Vue({
-                el: "#example2",
-                data: {
-                    mathsteps: mathsteps,
-                    //TODO:
-                    //WORKS:
-                    //formula: `0.125`,
-                    //formula: `-1/4`,
-                    //formula: `-1/2`,
-                    //formula: `-0.5`,
-                    //formula: `0.5`,
-                    //formula: `sqrt{3 / 2}`,
-                    //formula: `((7 - (7 - 0.1)) / (7 * (7 - 0.1))) / ((7 - 0.1) - 7)`,
-                    //formula: `(sqrt{10 + 14 * (-3 / 2 - 0.001)^2}) / (3 + 2 * (-3 / 2 - 0.001))`,
-                    formula: `(sin(pi/2) - sqrt{sin(pi/2)^2 + 10 * cos(pi/2)^2}) / (19 * cos(pi/2)^2)`,
-                    steps: [],
-                },
-                methods: {
-                },
-                created() {
-                    this.steps = mathsteps.simplifyExpression(this.formula);
-                },
-            });
-        }
-    </script>
 </body>
 
 <script>
@@ -206,7 +262,7 @@
 
     doUnitTests();
     setupExample1();
-    setupExample2();
+    var vue = setupExample2();
 
 </script>
 

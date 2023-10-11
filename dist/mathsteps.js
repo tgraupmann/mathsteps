@@ -2282,6 +2282,9 @@ NodeType.isSymbol = function(node, allowUnaryMinus=false) {
 };
 
 NodeType.isConstant = function(node, allowUnaryMinus=false) {
+  if (!node) {
+    debugger;
+  }
   if (node.type === 'ConstantNode') {
     return true;
   }
@@ -6614,6 +6617,7 @@ function step(node) {
       //console.log('***** Find Node with parent:', findResult.find.toString(), 'args=', findResult.find.args, findResult.find.toString(), 'node-', findResult.find, 'parent=', findResult.parent);
       //debugger;
       if (Node.Type.isFunction(findResult.find) &&
+      findResult.find.args[0] &&
         Node.Type.isConstant(findResult.find.args[0])) {
         //console.log('findResult=', findResult.find.toString(), 'type=', findResult.find.type, 'op=', findResult.find.op, 'args=', findResult.find.args[0].type, findResult.find);
         const newNode = node.cloneDeep();
